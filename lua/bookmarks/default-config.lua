@@ -140,6 +140,10 @@ return {
         action = "toggle",
         desc = "Toggle list expansion or go to bookmark location"
       },
+      ["<cr>"] = {
+        action = "toggle",
+        desc = "Toggle list expansion or go to bookmark location"
+      },
       ["<localleader>k"] = {
         action = "move_up",
         desc = "Move current node up in the list"
@@ -201,7 +205,7 @@ return {
         ---@type Bookmarks.KeymapCustomAction
         action = function(node, info)
           if info.type == 'bookmark' then
-            vim.system({'open', info.dirname}, { text = true })
+            vim.system({ 'open', info.dirname }, { text = true })
           end
         end,
         desc = "Open the current node with system default software",
