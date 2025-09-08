@@ -136,6 +136,24 @@ M["Goto linked in bookmarks"] = function()
   end, { prompt = "Bookmarks Linking to " .. bookmark.name, bookmarks = linked_in_bookmarks })
 end
 
+local Picker = require("bookmarks.picker")
+local Actions = require("bookmarks.picker.actions")
+
+M.goto_bookmark = function()
+  Picker.pick_bookmark(Actions.goto_bookmark)
+end
+
+M.list_bookmarks = function()
+  Picker.pick_bookmark_list(function(list)
+    if not list then
+      return
+    end
+    Service.switch_list(list.id)
+    Sign.safe_refresh_signs()
+    pcall(Tree.refresh, list.id)
+  end)
+end
+
 M["Mark and link to existing bookmark"] = function()
   vim.ui.input({ prompt = "[Bookmark Name]" }, function(input)
     if input then

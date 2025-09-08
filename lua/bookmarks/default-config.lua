@@ -47,6 +47,9 @@ return {
     -- telescope entry display generation logic
     ---@type: nil | fun(bookmark: Bookmarks.Node, bookmarks: Bookmarks.Node[]): string
     entry_display = nil,
+    -- Picker type to use: "telescope" or "snacks"
+    ---@type: "telescope" | "snacks"
+    type = "telescope",
   },
 
   -- Bookmark position calibration

@@ -2,7 +2,7 @@
 
 - Simple: Add, Rename and Remove bookmarks with only one command, less shortcuts more productivity.
 - Persistent: save your bookmarks into a sqlite db file
-- Accessible: Find your bookmark by telescope or Treeview with ease.
+- Accessible: Find your bookmark by telescope, snacks, or Treeview with ease.
 - Informative: mark with a name or description, so you can record more information.
 - Visibility: display icon and name at the marked lines, and highlight marked lines.
 - Lists: arrange your bookmarks in lists, organise the bookmarks in your way.
@@ -42,7 +42,8 @@ return {
   tag = "3.2.0",
   dependencies = {
     {"kkharji/sqlite.lua"},
-    {"nvim-telescope/telescope.nvim"},  -- currently has only telescopes supported, but PRs for other pickers are welcome 
+    {"nvim-telescope/telescope.nvim"},  -- telescope picker support
+    {"folke/snacks.nvim"},  -- snacks picker support (alternative to telescope)
     {"stevearc/dressing.nvim"}, -- optional: better UI
     {"GeorgesAlkhouri/nvim-aider"} -- optional: for Aider integration
   },
@@ -59,6 +60,21 @@ return {
 
 > For Windows users, if you encounter sqlite dependency issues, please refer to https://github.com/LintaoAmons/bookmarks.nvim/issues/73 for potential solutions.
 
+## Picker Configuration
+
+By default, the plugin uses telescope.nvim for fuzzy finding. You can also configure it to use snacks.nvim instead:
+
+```lua
+local opts = {
+  picker = {
+    type = "snacks",  -- or "telescope" (default)
+  }
+}
+require("bookmarks").setup(opts)
+```
+
+Both pickers provide the same functionality with similar keybindings.
+
 ## Usage
 
 ### Basic Bookmark Operations
@@ -66,9 +82,9 @@ return {
 | Command         | Description                                                                                                                         |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | `BookmarksMark` | Mark current line into active BookmarkList. Rename existing bookmark under cursor. Toggle it off if the new name is an empty string |
-| `BookmarksGoto` | Go to bookmark at current active BookmarkList with telescope                                                                        |
+| `BookmarksGoto` | Go to bookmark at current active BookmarkList with the configured picker (telescope or snacks)                                                                        |
 | `BookmarksNewList` | Create a new bookmark list, but I normally use `BookmarksTree` to create new list |
-| `BookmarksLists`   | Pick a bookmark list with telescope                                               |
+| `BookmarksLists`   | Pick a bookmark list with the configured picker (telescope or snacks)                                               |
 | `BookmarksCommands`        | Find bookmark commands and trigger it                    |
 
 > [!NOTE]

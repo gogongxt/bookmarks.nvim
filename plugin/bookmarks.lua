@@ -16,6 +16,7 @@ vim.g.bookmarks_config = nil
 vim.g.bookmark_tree_view_ctx = nil
 
 local bookmarks = require("bookmarks")
+local Commands = require("bookmarks.commands")
 
 vim.api.nvim_create_user_command("BookmarksMark", bookmarks.toggle_mark, {
   desc = "Mark current line into active BookmarkList. Rename existing bookmark under cursor. Toggle it off if the new name is an empty string",
@@ -27,7 +28,7 @@ vim.api.nvim_create_user_command("BookmarksDesc", bookmarks.attach_desc, {
 
 vim.api.nvim_create_user_command(
   "BookmarksGoto",
-  bookmarks.goto_bookmark,
+  Commands.goto_bookmark,
   { desc = "Go to bookmark at current active BookmarkList" }
 )
 
@@ -61,7 +62,7 @@ vim.api.nvim_create_user_command(
   { desc = "Grep through the content of all bookmarked files" }
 )
 
-vim.api.nvim_create_user_command("BookmarksLists", bookmarks.bookmark_lists, { desc = "Pick a bookmark list" })
+vim.api.nvim_create_user_command("BookmarksLists", Commands.list_bookmarks, { desc = "Pick a bookmark list" })
 
 vim.api.nvim_create_user_command(
   "BookmarksNewList",
