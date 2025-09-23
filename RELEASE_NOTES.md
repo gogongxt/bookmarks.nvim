@@ -1,3 +1,23 @@
+# v3.3.0 Release Notes
+
+## Key Enhancements
+
+### Tree View Help Panel
+- **Help Panel**: Added `?` shortcut to display a comprehensive help panel in the bookmarktree view showing all available keymaps with descriptions.
+- **Visual Help Hint**: Added "Press ? for help" hint at the bottom of the tree panel as virtual text to inform users about the help functionality.
+- **Floating Window Interface**: Help panel appears in a centered floating window with rounded borders and proper highlighting.
+- **User-Friendly Navigation**: Help panel can be closed with `<ESC>` or `q` keys for easy access and dismissal.
+
+```lua
+-- New keymap automatically available in tree view:
+-- "?" - Show help panel with all available shortcuts and their descriptions
+```
+
+## Upgrading
+This release is backward compatible and adds new help functionality without breaking existing configurations.
+
+---
+
 # v3.2.0 Release Notes
 
 ## Key Enhancements

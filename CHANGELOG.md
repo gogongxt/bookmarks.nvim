@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.0] - 2025-01-XX
+
+### Added
+- Tree view help panel: Added `?` shortcut to display a floating window with all available keymaps and their descriptions.
+- Visual help hint: Added "Press ? for help" virtual text at the bottom of the tree panel to inform users about help functionality.
+- Enhanced user experience: Help panel features centered floating window with rounded borders and can be closed with `<ESC>` or `q`.
+
 ## [3.2.0] - 2025-06-20
 
 ### Added
