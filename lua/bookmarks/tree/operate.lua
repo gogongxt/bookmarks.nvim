@@ -665,4 +665,68 @@ function M.preview()
   end
 end
 
+--- Show help panel with available keymaps
+function M.show_help()
+  local keymap = vim.g.bookmarks_config.treeview.keymap or {}
+
+  -- Create help content
+  local help_lines = {
+    "BookmarksTree Help",
+    "==================",
+    "",
+  }
+
+  -- Sort keymaps for consistent display
+  local sorted_keys = {}
+  for key, _ in pairs(keymap) do
+    table.insert(sorted_keys, key)
+  end
+  table.sort(sorted_keys)
+
+  -- Add each keymap with description
+  for _, key in ipairs(sorted_keys) do
+    local mapping = keymap[key]
+    local desc = mapping.desc or ("Action: " .. (type(mapping.action) == "string" and mapping.action or "custom"))
+    table.insert(help_lines, string.format("%-15s %s", key, desc))
+  end
+
+  table.insert(help_lines, "")
+  table.insert(help_lines, "Press <ESC> or q to close this help")
+
+  -- Create floating window
+  local width = math.max(60, math.floor(vim.o.columns * 0.6))
+  local height = math.min(#help_lines + 2, math.floor(vim.o.lines * 0.8))
+
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, help_lines)
+  vim.bo[buf].modifiable = false
+  vim.bo[buf].filetype = "bookmarks-help"
+
+  local win = vim.api.nvim_open_win(buf, true, {
+    relative = "editor",
+    width = width,
+    height = height,
+    row = math.floor((vim.o.lines - height) / 2),
+    col = math.floor((vim.o.columns - width) / 2),
+    style = "minimal",
+    border = "rounded",
+    title = " BookmarksTree Help ",
+    title_pos = "center",
+  })
+
+  -- Set up keymaps to close help
+  local close_help = function()
+    if vim.api.nvim_win_is_valid(win) then
+      vim.api.nvim_win_close(win, true)
+    end
+  end
+
+  vim.keymap.set("n", "<ESC>", close_help, { buffer = buf, silent = true })
+  vim.keymap.set("n", "q", close_help, { buffer = buf, silent = true })
+
+  -- Set highlight for the title
+  vim.api.nvim_buf_add_highlight(buf, -1, "Title", 0, 0, -1)
+  vim.api.nvim_buf_add_highlight(buf, -1, "Comment", 1, 0, -1)
+end
+
 return M
