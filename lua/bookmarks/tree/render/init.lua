@@ -121,6 +121,11 @@ function M.refresh(root)
 
   render_tree_recursive(root, lines, lines_ctx, 0, root.id, active_list_id)
 
+  -- Add an empty line at the end to hold the virtual text
+  if #lines > 0 then
+    table.insert(lines, "")
+  end
+
   local buf = vim.g.bookmark_tree_view_ctx.buf
   local win = vim.g.bookmark_tree_view_ctx.win
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
@@ -137,15 +142,15 @@ function M.refresh(root)
       Highlight.highlight_active_list(buf, active_list.id, lines_ctx)
     end
 
-    -- Add virtual text help hint at the bottom if there are lines
+    -- Add virtual text help hint on the empty line if there are lines
     if #lines > 0 then
       -- Clear any existing virtual text first
       vim.api.nvim_buf_clear_namespace(buf, -1, 0, -1)
 
-      -- Add virtual text at the last line
+      -- Add virtual text on the empty line (last line)
       vim.api.nvim_buf_set_extmark(buf, vim.api.nvim_create_namespace("bookmarks_help"), #lines - 1, 0, {
         virt_text = {{ "Press ? for help", "Comment" }},
-        virt_text_pos = "eol",
+        virt_text_pos = "overlay",
       })
     end
   end)
