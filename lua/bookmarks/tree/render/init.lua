@@ -121,9 +121,10 @@ function M.refresh(root)
 
   render_tree_recursive(root, lines, lines_ctx, 0, root.id, active_list_id)
 
-  -- Add an empty line at the end to hold the virtual text
+  -- Add gap and empty line at the end to hold the virtual text
   if #lines > 0 then
-    table.insert(lines, "")
+    table.insert(lines, "")  -- Gap line
+    table.insert(lines, "")  -- Line for virtual text
   end
 
   local buf = vim.g.bookmark_tree_view_ctx.buf
