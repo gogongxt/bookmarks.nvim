@@ -200,6 +200,10 @@ return {
         action = "drop_from_aider",
         desc = "Drop from Aider"
       },
+      ["?"] = {
+        action = "show_help",
+        desc = "Show help panel with available keymaps"
+      },
       -- Example of a custom mapping
       ["<C-o>"] = {
         ---@type Bookmarks.KeymapCustomAction
