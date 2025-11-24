@@ -175,8 +175,22 @@ function M.goto_bookmark(bookmark_id, opts)
     end
   end
 
-  -- Move cursor to the bookmarked position
-  vim.api.nvim_win_set_cursor(0, { node.location.line, node.location.col })
+  -- Move cursor to the bookmarked position with validation
+  local current_buf = vim.api.nvim_get_current_buf()
+  local line_count = vim.api.nvim_buf_line_count(current_buf)
+
+  -- Validate line number is within buffer bounds
+  local target_line = math.min(node.location.line, line_count)
+  target_line = math.max(1, target_line) -- Ensure at least line 1
+
+  -- Validate column number is within line bounds
+  local line_content = vim.api.nvim_buf_get_lines(current_buf, target_line - 1, target_line, false)[1]
+  local target_col = 0
+  if line_content then
+    target_col = math.min(node.location.col, #line_content)
+  end
+
+  vim.api.nvim_win_set_cursor(0, { target_line, target_col })
   vim.cmd("normal! zz")
   Sign.safe_refresh_signs()
 

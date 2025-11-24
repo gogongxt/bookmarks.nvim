@@ -10,52 +10,28 @@ end
 
 local M = {}
 
+local function safe_string(str)
+  if type(str) ~= "string" then
+    return ""
+  end
+  return str
+end
+
 local function format_entry(bookmark, bookmarks)
-  -- Calculate widths from all bookmarks
-  local max_name = 15     -- minimum width
-  local max_filename = 20 -- minimum width
-  local max_filepath = 20 -- minimum width
+  local name = ""
+  local filename = ""
+  local path = ""
 
-  for _, bm in ipairs(bookmarks) do
-    max_name = math.max(max_name, #bm.name)
-    local filename = vim.fn.fnamemodify(bm.location.path, ":t")
-    local path = vim.fn.pathshorten(bm.location.path)
-    max_filename = math.max(max_filename, #filename)
-    max_filepath = math.max(max_filepath, #path)
+  if bookmark then
+    name = type(bookmark.name) == "string" and bookmark.name or ""
+    if bookmark.location and type(bookmark.location.path) == "string" then
+      filename = vim.fn.fnamemodify(bookmark.location.path, ":t") or ""
+      path = vim.fn.pathshorten(bookmark.location.path) or ""
+    end
   end
 
-  -- Apply maximum constraints
-  max_name = math.min(max_name, 30)
-  max_filename = math.min(max_filename, 30)
-  max_filepath = math.min(max_filepath, 40)
-
-  -- Format current bookmark entry
-  local name = bookmark.name
-  local filename = vim.fn.fnamemodify(bookmark.location.path, ":t")
-  local path = vim.fn.pathshorten(bookmark.location.path)
-
-  -- Pad or truncate name
-  if #name > max_name then
-    name = name:sub(1, max_name - 2) .. ".."
-  else
-    name = name .. string.rep(" ", max_name - #name)
-  end
-
-  -- Pad or truncate filename
-  if #filename > max_filename then
-    filename = filename:sub(1, max_filename - 2) .. ".."
-  else
-    filename = filename .. string.rep(" ", max_filename - #filename)
-  end
-
-  -- Pad or truncate path
-  if #path > max_filepath then
-    path = path:sub(1, max_filepath - 2) .. ".."
-  else
-    path = path .. string.rep(" ", max_filepath - #path)
-  end
-
-  return string.format("%s │ %s │ %s", name, filename, path)
+  -- Ensure all parts are valid strings before formatting
+  return tostring(name) .. " │ " .. tostring(filename) .. " │ " .. tostring(path)
 end
 
 ---Pick a *bookmark* then call the callback function against it
@@ -70,85 +46,58 @@ function M.pick_bookmark(callback, opts)
     -- Convert bookmarks to snacks picker items
     local items = {}
     for _, bookmark in ipairs(_bookmarks) do
-      local entry_display = vim.g.bookmarks_config.picker.entry_display or format_entry
-      local display = entry_display(bookmark, _bookmarks)
-      table.insert(items, {
-        text = display,
-        bookmark = bookmark,
-        file = bookmark.location.path,
-        lnum = bookmark.location.line,
-        col = bookmark.location.col,
-        pos = { bookmark.location.line, bookmark.location.col },
-        -- Add location info for line-specific preview
-        loc = {
-          range = {
-            ["start"] = {
-              line = bookmark.location.line - 1, -- 0-indexed for LSP
-              character = bookmark.location.col,
-            },
-            ["end"] = {
-              line = bookmark.location.line - 1, -- 0-indexed for LSP
-              character = bookmark.location.col,
-            },
-          },
-        },
-      })
+      -- Basic validation only
+      if bookmark and bookmark.location and bookmark.location.path then
+        -- Validate all string fields to prevent encoding errors
+        local name = bookmark.name or ""
+        local path = bookmark.location.path or ""
+
+        -- Only process if all required strings are valid
+        if type(name) == "string" and type(path) == "string" and path ~= "" then
+          local entry_display = vim.g.bookmarks_config.picker.entry_display or format_entry
+          local display = entry_display(bookmark, _bookmarks) or ""
+
+          table.insert(items, {
+            text = display,
+            bookmark_id = bookmark.id,
+            file = path,
+            line = bookmark.location.line or 1,
+            col = bookmark.location.col or 0,
+          })
+        end
+      end
     end
 
+    -- Create safe prompt
+    local list_name = list and type(list.name) == "string" and list.name or "Unknown"
+    local prompt = "Bookmarks in [" .. list_name .. "] "
+
     local picker_opts = {
-      prompt = opts.prompt or ("Bookmarks in [" .. list.name .. "] "),
+      prompt = prompt,
       items = items,
       format = function(item)
-        return { { item.text } }
+        return { { tostring(item.text or "") } }
       end,
       preview = snacks.picker.preview.file,
       actions = {
-        confirm = "jump",
+        confirm = function(picker, item)
+          if item and item.bookmark_id then
+            require("bookmarks.domain.service").goto_bookmark(item.bookmark_id)
+          end
+        end,
         delete = function(picker)
           local selected_items = picker:selected({ fallback = true })
-          local current_cursor = picker.list.cursor
           if #selected_items > 0 then
             local selected = selected_items[1]
-            -- Call the shared actions module to handle deletion
-            require("bookmarks.picker.actions").delete(picker, selected)
-            -- Restart the picker with a slight delay to allow UI to update
-            local opts = picker.opts
-            picker:close()
-            vim.defer_fn(function()
-              M.pick_bookmark(nil, { prompt = opts.prompt })
-              -- Restore cursor position after picker restarts
-              vim.defer_fn(function()
-                local picker_win = vim.api.nvim_get_current_win()
-                local buf = vim.api.nvim_win_get_buf(picker_win)
-                if vim.api.nvim_buf_is_valid(buf) then
-                  vim.api.nvim_win_set_cursor(
-                    picker_win,
-                    { math.min(current_cursor, vim.api.nvim_buf_line_count(buf)), 0 }
-                  )
-                end
-              end, 50)
-            end, 50)
-          else
-            -- If no item is selected, use the current target
-            local current_item = picker.list:get_target()
-            if current_item then
-              require("bookmarks.picker.actions").delete(picker, current_item)
-              -- Restart the picker with a slight delay to allow UI to update
+            if selected and selected.bookmark_id then
+              -- Delete the bookmark using the service
+              require("bookmarks.domain.service").delete_node(selected.bookmark_id)
+
+              -- Restart the picker with a slight delay
               local opts = picker.opts
               picker:close()
               vim.defer_fn(function()
                 M.pick_bookmark(nil, { prompt = opts.prompt })
-                -- Restore cursor position after picker restarts
-                vim.defer_fn(function()
-                  local picker_win = vim.api.nvim_get_current_win()
-                  local buf = vim.api.nvim_win_get_buf(picker_win)
-                  if vim.api.nvim_buf_is_valid(buf) then
-                    vim.api.nvim_win_set_cursor(
-                      picker_win,
-                      { math.min(current_cursor, vim.api.nvim_buf_line_count(buf)), 0 }
-                    )
-                  end
-                end, 50)
               end, 50)
             end
           end
@@ -157,27 +106,27 @@ function M.pick_bookmark(callback, opts)
           local selected_items = picker:selected({ fallback = true })
           if #selected_items > 0 then
             local selected = selected_items[1]
-            -- Call the shared actions module
-            require("bookmarks.picker.actions").open_in_split(picker, selected)
-            -- No need to close, actions will handle navigation
+            if selected and selected.bookmark_id then
+              require("bookmarks.domain.service").goto_bookmark(selected.bookmark_id, { cmd = "split" })
+            end
           end
         end,
         open_vsplit = function(picker)
           local selected_items = picker:selected({ fallback = true })
           if #selected_items > 0 then
             local selected = selected_items[1]
-            -- Call the shared actions module
-            require("bookmarks.picker.actions").open_in_vsplit(picker, selected)
-            -- No need to close, actions will handle navigation
+            if selected and selected.bookmark_id then
+              require("bookmarks.domain.service").goto_bookmark(selected.bookmark_id, { cmd = "vsplit" })
+            end
           end
         end,
         open_tab = function(picker)
           local selected_items = picker:selected({ fallback = true })
           if #selected_items > 0 then
             local selected = selected_items[1]
-            -- Call the shared actions module
-            require("bookmarks.picker.actions").open_in_new_tab(picker, selected)
-            -- No need to close, actions will handle navigation
+            if selected and selected.bookmark_id then
+              require("bookmarks.domain.service").goto_bookmark(selected.bookmark_id, { cmd = "tabnew" })
+            end
           end
         end,
       },
