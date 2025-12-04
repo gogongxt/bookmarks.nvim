@@ -35,18 +35,24 @@ function M.pick_bookmark_list(callback, opts)
       end,
       actions = {
         confirm = function(picker)
-          local selected = picker:selected()[1]
-          if selected then
+          local selected_items = picker:selected({ fallback = true })
+          if #selected_items > 0 then
+            local selected = selected_items[1]
             picker:close()
             callback(selected.list)
           end
         end,
         delete = function(picker)
-          local selected = picker:selected()[1]
-          if selected then
-            Service.delete_node(selected.list.id)
-            picker:close()
-            start_picker(Repo.find_lists())
+          local selected_items = picker:selected({ fallback = true })
+          if #selected_items > 0 then
+            local selected = selected_items[1]
+            local ok, err = pcall(Service.delete_node, selected.list.id)
+            if ok then
+              picker:close()
+              start_picker(Repo.find_lists())
+            else
+              vim.notify("Failed to delete list: " .. tostring(err), vim.log.levels.ERROR)
+            end
           end
         end,
       },
