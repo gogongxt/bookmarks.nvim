@@ -8,6 +8,48 @@ end
 
 local tbl = require("sqlite.tbl")
 
+-- Store the project root for path conversion
+local project_root = nil
+
+---Set the project root for relative path conversion
+---@param root string The project root directory
+function M.set_project_root(root)
+  project_root = vim.fn.fnamemodify(root, ":p")
+end
+
+---Convert absolute path to relative path for storage
+---@param abs_path string The absolute path
+---@return string The relative path
+local function to_relative_path(abs_path)
+  if not project_root then
+    return abs_path -- Fallback to absolute path if no project root
+  end
+
+  -- Ensure project_root ends with /
+  if not project_root:match("/$") then
+    project_root = project_root .. "/"
+  end
+
+  -- Convert to relative path if the file is under project root
+  if abs_path:sub(1, #project_root) == project_root then
+    return abs_path:sub(#project_root + 1)
+  end
+
+  -- Fallback to absolute path if outside project
+  return abs_path
+end
+
+---Convert relative path to absolute path for usage
+---@param rel_path string The relative path
+---@return string The absolute path
+local function to_absolute_path(rel_path)
+  if not project_root or rel_path:match("^/") then
+    return rel_path -- Already absolute or no project root
+  end
+
+  return project_root .. rel_path
+end
+
 -- Database schema definitions
 local nodes_tbl = tbl("nodes", {
   id = true,
@@ -98,7 +140,8 @@ local function node_to_db_row(node)
   }
 
   if node.location then
-    row.location_path = node.location.path
+    -- Store path as relative to project root
+    row.location_path = to_relative_path(node.location.path)
     row.location_line = node.location.line
     row.location_col = node.location.col
   end
@@ -126,8 +169,9 @@ local function db_row_to_node(row)
   }
 
   if row.location_path then
+    -- Convert stored relative path back to absolute path
     node.location = {
-      path = row.location_path,
+      path = to_absolute_path(row.location_path),
       line = row.location_line,
       col = row.location_col,
     }
@@ -212,12 +256,16 @@ end
 ---@param node_id number
 function M.delete_node(node_id)
   -- First delete all relationships
-  DB.node_relationships:remove({ where = {
-    child_id = node_id,
-  } })
-  DB.node_relationships:remove({ where = {
-    parent_id = node_id,
-  } })
+  DB.node_relationships:remove({
+    where = {
+      child_id = node_id,
+    },
+  })
+  DB.node_relationships:remove({
+    where = {
+      parent_id = node_id,
+    },
+  })
 
   -- Then delete the node itself
   DB.nodes:remove({ where = { id = node_id } })
@@ -336,9 +384,11 @@ function M.find_bookmark_by_location(location, opts)
   opts = opts or {}
   local row
   if opts.all_bookmarks then
+    -- Convert path to relative path for comparison
+    local search_path = to_relative_path(location.path)
     row = DB.nodes:where({
       type = "bookmark",
-      location_path = location.path,
+      location_path = search_path,
       location_line = location.line,
     })
   else
@@ -381,9 +431,11 @@ end
 ---@param location Bookmarks.Location
 ---@return Bookmarks.Node?
 function M.find_node_by_location(location)
+  -- Convert path to relative path for comparison
+  local search_path = to_relative_path(location.path)
   local row = DB.nodes:where({
     type = "bookmark",
-    location_path = location.path,
+    location_path = search_path,
     location_line = location.line,
   })
 
@@ -412,11 +464,14 @@ function M.find_bookmarks_by_path(path, list_id)
     },
   })
 
+  -- Convert path to relative path for comparison
+  local search_path = to_relative_path(path)
+
   -- Get all bookmarks matching the path
   local path_bookmarks = DB.nodes:get({
     where = {
       type = "bookmark",
-      location_path = path,
+      location_path = search_path,
     },
   })
 

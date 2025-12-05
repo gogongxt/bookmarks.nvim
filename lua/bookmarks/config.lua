@@ -1,36 +1,74 @@
 local default_config = require("bookmarks.default-config")
 
+---Get the project root directory
+---@return string?
+local function get_project_root()
+  -- Use current working directory as the primary project root
+  -- This is the directory where `nvim` was opened
+  local cwd = vim.fn.getcwd()
+  local project_root = vim.fn.fnamemodify(cwd, ":p")
+
+  -- Ensure the path ends with '/'
+  if not project_root:match("/$") then
+    project_root = project_root .. "/"
+  end
+
+  return project_root
+end
+
 ---Get the database file path from config or fallback
 ---@param db_dir? string Directory to store the database
 ---@return string
 local function get_db_path(db_dir)
-  if not db_dir then
-    return vim.fn.stdpath("data") .. "/bookmarks.sqlite.db"
+  if db_dir then
+    -- If custom db_dir is provided, use it (backward compatibility)
+    if vim.fn.isdirectory(db_dir) == 0 then
+      local ok = vim.fn.mkdir(db_dir, "p")
+      if ok == 0 then
+        error(string.format("Failed to create directory for database: %s", db_dir))
+      end
+    end
+    return vim.fn.fnamemodify(db_dir .. "/bookmarks.sqlite.db", ":p")
   end
 
-  -- Validate/create directory
-  if vim.fn.isdirectory(db_dir) == 0 then
-    local ok = vim.fn.mkdir(db_dir, "p")
+  -- Default behavior: use project-level .bookmarks directory
+  local project_root = get_project_root()
+  if not project_root then
+    error("Failed to determine project root")
+  end
+
+  local nvim_dir = project_root .. ".nvim"
+
+  -- Create .nvim directory if it doesn't exist
+  if vim.fn.isdirectory(nvim_dir) == 0 then
+    local ok = vim.fn.mkdir(nvim_dir, "p")
     if ok == 0 then
-      error(string.format("Failed to create directory for database: %s", db_dir))
+      error(string.format("Failed to create .nvim directory: %s", nvim_dir))
     end
   end
 
-  -- Combine directory with default database filename
-  return vim.fn.fnamemodify(db_dir .. "/bookmarks.sqlite.db", ":p")
+  return nvim_dir .. "/bookmarks.sqlite.db"
 end
 
 ---@param user_config? Bookmarks.Config
 ---@return nil
 local setup = function(user_config)
   local cfg = vim.tbl_deep_extend("force", vim.g.bookmarks_config or default_config, user_config or {})
-    or default_config
+      or default_config
   vim.g.bookmarks_config = cfg
 
-  require("bookmarks.domain.repo").setup(get_db_path(cfg.db_dir))
+  local db_path = get_db_path(cfg.db_dir)
+
+  -- Set project root for relative path conversion
+  if not cfg.db_dir then -- Only use project-level logic when db_dir is not explicitly set
+    local project_root = get_project_root()
+    require("bookmarks.domain.repo").set_project_root(project_root)
+  end
+
+  require("bookmarks.domain.repo").setup(db_path)
   require("bookmarks.sign").setup(cfg.signs)
   require("bookmarks.auto-cmd").setup()
-  require("bookmarks.backup").setup(cfg, get_db_path(cfg.db_dir))
+  require("bookmarks.backup").setup(cfg, db_path)
 end
 
 return {
