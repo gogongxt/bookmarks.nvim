@@ -56,7 +56,7 @@ local function get_line_content(file_path, line_num)
 
   -- 检查文件可读性
   if vim.fn.filereadable(file_path) ~= 1 then
-    return "<文件不可读>"
+    return "<文件不存在>"
   end
 
   -- 使用缓存提高性能
@@ -169,7 +169,7 @@ function M.pick_bookmark(callback, opts)
         if type(name) == "string" and type(path) == "string" and path ~= "" then
           -- Normalize the path for snacks picker
           local normalized_path = normalize_path(path)
-          if normalized_path and vim.fn.filereadable(normalized_path) == 1 then
+          if normalized_path then
             local line_num = bookmark.location.line or 1
             local col_num = bookmark.location.col or 0
 
@@ -367,7 +367,7 @@ function M.grep_bookmark(opts)
     if bookmark.location and bookmark.location.path then
       local path = bookmark.location.path
       local normalized_path = normalize_path(path)
-      if normalized_path and not seen[normalized_path] and vim.fn.filereadable(normalized_path) == 1 then
+      if normalized_path and not seen[normalized_path] then
         seen[normalized_path] = true
         table.insert(files, normalized_path)
       end
