@@ -511,9 +511,39 @@ function M.find_bookmark_by_location(location, opts)
   return nil
 end
 
----Find all lists except the root list, ordered by creation date
+---Find all lists, ordered by creation date (root list first)
 ---@return Bookmarks.Node[]
 function M.find_lists()
+  local results = {}
+
+  -- First, always include the root list
+  local root_node = M.find_node(0)
+  if root_node then
+    table.insert(results, root_node)
+  end
+
+  local lists = {}
+  for _, storage_node in pairs(data.nodes) do
+    if storage_node.type == "list" and storage_node.id ~= 0 then
+      table.insert(lists, storage_node)
+    end
+  end
+
+  -- Sort by creation date
+  table.sort(lists, function(a, b)
+    return a.created_at > b.created_at
+  end)
+
+  for _, storage_node in ipairs(lists) do
+    table.insert(results, storage_to_node(storage_node))
+  end
+
+  return results
+end
+
+---Find all lists except the root list, ordered by creation date (for backward compatibility)
+---@return Bookmarks.Node[]
+function M.find_lists_exclude_root()
   local results = {}
 
   local lists = {}

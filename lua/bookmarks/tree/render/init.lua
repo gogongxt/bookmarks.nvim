@@ -139,6 +139,11 @@ function M.refresh(root)
 
   -- Apply highlight in next tick to ensure buffer is ready
   vim.schedule(function()
+    -- Check if buffer is still valid
+    if not buf or not vim.api.nvim_buf_is_valid(buf) then
+      return
+    end
+
     if active_list then
       Highlight.highlight_active_list(buf, active_list.id, lines_ctx)
     end
@@ -149,7 +154,16 @@ function M.refresh(root)
       vim.api.nvim_buf_clear_namespace(buf, -1, 0, -1)
 
       -- Add virtual text on the empty line (last line)
-      vim.api.nvim_buf_set_extmark(buf, vim.api.nvim_create_namespace("bookmarks_help"), #lines - 1, 0, {
+      -- Ensure line number is valid by using math.max to prevent negative indices
+      local last_line = math.max(0, #lines - 1)
+
+      -- Get actual buffer line count to ensure we don't exceed
+      local line_count = vim.api.nvim_buf_line_count(buf)
+      if last_line >= line_count then
+        last_line = math.max(0, line_count - 1)
+      end
+
+      vim.api.nvim_buf_set_extmark(buf, vim.api.nvim_create_namespace("bookmarks_help"), last_line, 0, {
         virt_text = {{ "Press ? for help", "Comment" }},
         virt_text_pos = "overlay",
       })

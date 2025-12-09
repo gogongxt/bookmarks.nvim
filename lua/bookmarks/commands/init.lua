@@ -148,7 +148,7 @@ M.list_bookmarks = function()
     if not list then
       return
     end
-    Service.switch_list(list.id)
+    Service.set_active_list(list.id)
     Sign.safe_refresh_signs()
     pcall(Tree.refresh, list.id)
   end)
