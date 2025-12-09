@@ -44,7 +44,7 @@ function M.toggle_mark(name, location, parent_list_id)
 
   -- else create a new bookmark
   parent_list_id = parent_list_id or Repo.ensure_and_get_active_list().id
-  local bookmark = Node.new_bookmark(name)
+  local bookmark = Node.new_bookmark(name, location)
 
   local id = Repo.insert_node(bookmark, parent_list_id)
 

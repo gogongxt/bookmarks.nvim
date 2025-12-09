@@ -13,8 +13,14 @@ M.setup = require("bookmarks.config").setup
 
 M.toggle_mark = function()
   local b = Service.find_bookmark_by_location()
-  vim.ui.input({ prompt = "[Bookmarks Toggle]", default = b and b.name or "" }, function(input)
-    if input then
+  local prompt = b and "[Edit Bookmark]" or "[New Bookmark]"
+  local default_name = b and b.name or ""
+
+  vim.ui.input({
+    prompt = prompt,
+    default = default_name,
+  }, function(input)
+    if input ~= nil then  -- input is nil only if user cancels
       Service.toggle_mark(input)
       Sign.safe_refresh_signs()
       pcall(Tree.refresh)

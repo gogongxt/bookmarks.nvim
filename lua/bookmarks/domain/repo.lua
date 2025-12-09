@@ -484,18 +484,32 @@ function M.find_bookmark_by_location(location, opts)
        storage_node.location.line == location.line then
 
       if not opts.all_bookmarks then
-        -- Check if bookmark is in active list
+        -- Check if bookmark is accessible from current active list
         local active_list = M.ensure_and_get_active_list()
-        local found_in_active = false
+        local is_accessible = false
 
+        -- Direct child of active list
         for _, child_id in ipairs(active_list.children or {}) do
           if child_id == storage_node.id then
-            found_in_active = true
+            is_accessible = true
             break
           end
         end
 
-        if not found_in_active then
+        -- If not direct child, check if active list is root (can access all bookmarks)
+        -- or if active list is ancestor of the bookmark's parent list
+        if not is_accessible then
+          if active_list.id == 0 then
+            -- Root list can access all bookmarks
+            is_accessible = true
+          else
+            -- Check if bookmark is in any sublist of active list
+            is_accessible = M.is_bookmark_in_sublist(active_list.id, storage_node.id)
+          end
+        end
+
+        if not is_accessible then
+          -- Bookmark exists but is in a different list that's not accessible
           goto continue
         end
       end
@@ -509,6 +523,37 @@ function M.find_bookmark_by_location(location, opts)
   end
 
   return nil
+end
+
+---Check if a bookmark is in any sublist of the given list ID
+---@param list_id number # The list ID to check sublists of
+---@param bookmark_id number # The bookmark ID to find
+---@return boolean # True if bookmark is found in any sublist
+function M.is_bookmark_in_sublist(list_id, bookmark_id)
+  -- Get all children of the list
+  local list = M.find_node(list_id)
+  if not list or list.type ~= "list" then
+    return false
+  end
+
+  -- Check direct children first
+  for _, child_id in ipairs(list.children or {}) do
+    if child_id == bookmark_id then
+      return true
+    end
+  end
+
+  -- Check sublists recursively
+  for _, child_id in ipairs(list.children or {}) do
+    local child = M.find_node(child_id)
+    if child and child.type == "list" then
+      if M.is_bookmark_in_sublist(child.id, bookmark_id) then
+        return true
+      end
+    end
+  end
+
+  return false
 end
 
 ---Find all lists, ordered by creation date (root list first)
