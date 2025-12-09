@@ -79,13 +79,13 @@ Both pickers provide the same functionality with similar keybindings.
 
 ### Basic Bookmark Operations
 
-| Command         | Description                                                                                                                         |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `BookmarksMark` | Mark current line into active BookmarkList. Rename existing bookmark under cursor. Toggle it off if the new name is an empty string |
-| `BookmarksGoto` | Go to bookmark at current active BookmarkList with the configured picker (telescope or snacks)                                                                        |
-| `BookmarksNewList` | Create a new bookmark list, but I normally use `BookmarksTree` to create new list |
-| `BookmarksLists`   | Pick a bookmark list with the configured picker (telescope or snacks)                                               |
-| `BookmarksCommands`        | Find bookmark commands and trigger it                    |
+| Command             | Description                                                                                                                         |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `BookmarksMark`     | Mark current line into active BookmarkList. Rename existing bookmark under cursor. Toggle it off if the new name is an empty string |
+| `BookmarksGoto`     | Go to bookmark at current active BookmarkList with the configured picker (telescope or snacks)                                      |
+| `BookmarksNewList`  | Create a new bookmark list, but I normally use `BookmarksTree` to create new list                                                   |
+| `BookmarksLists`    | Pick a bookmark list with the configured picker (telescope or snacks)                                                               |
+| `BookmarksCommands` | Find bookmark commands and trigger it                                                                                               |
 
 > [!NOTE]
 > Those Telescope shortcuts are also available
@@ -155,41 +155,15 @@ keymap = {
 | `BookmarksGotoNextInList` | Go to next bookmark by order id within the current active BookmarkList              |
 | `BookmarksGotoPrevInList` | Go to next bookmark by order id within the current active BookmarkList              |
 
-You can also use `Hydra` to make `navigation` easier
-
-```lua
--- use `nvimtools/hydra.nvim`: https://github.com/anuvyklack/hydra.nvim/issues/104
-local Hydra = require('hydra')
-Hydra({
-  name = "Bookmarks",
-  mode = 'n',
-  body = '<leader>m',
-  hint = [[
-  Bookmark Navigation
-
-  ^  _j_: Next in List     _J_: Next Bookmark
-  ^  _k_: Prev in List     _K_: Prev Bookmark
-  ^
-  ^ _<Esc>_: Exit
-  ]],
-  heads = {
-    { 'j', '<cmd>BookmarksGotoNextInList<cr>' },
-    { 'k', '<cmd>BookmarksGotoPrevInList<cr>' },
-    { 'J', '<cmd>BookmarksGotoNext<cr>' },
-    { 'K', '<cmd>BookmarksGotoPrev<cr>' },
-  },
-})
-```
-
 ### More commands
 
-| Command            | Description                                                                       |
-| ------------------ | --------------------------------------------------------------------------------- |
-| `BookmarksDesc`    | Add description to the bookmark under cursor, if no bookmark, then mark it first  |
-| `BookmarksGrep`    | Grep through the content of all bookmarked files                                  |
-| `BookmarksInfo`    | Overview plugin current status                                                    |
-| `BookmarksInfoCurrentBookmark` | Show current bookmark info                                            |
-| `BookmarkRebindOrphanNode` | Rebind orphaned nodes by attaching them to the root node          |
+| Command                        | Description                                                                      |
+| ------------------------------ | -------------------------------------------------------------------------------- |
+| `BookmarksDesc`                | Add description to the bookmark under cursor, if no bookmark, then mark it first |
+| `BookmarksGrep`                | Grep through the content of all bookmarked files                                 |
+| `BookmarksInfo`                | Overview plugin current status                                                   |
+| `BookmarksInfoCurrentBookmark` | Show current bookmark info                                                       |
+| `BookmarkRebindOrphanNode`     | Rebind orphaned nodes by attaching them to the root node                         |
 
 ### Keymap
 
@@ -206,26 +180,3 @@ vim.keymap.set({ "n", "v" }, "ma", "<cmd>BookmarksCommands<cr>", { desc = "Find 
 In this section, we will cover advanced usage of the bookmarks.nvim plugin, focusing on customization and programmatic interaction.
 
 Check the [ADVANCED_USAGE.md](./ADVANCED_USAGE.md) for more detailed information on advanced configurations and usage.
-
-## CONTRIBUTING
-
-Don't hesitate to ask me anything about the codebase if you want to contribute.
-
-Goto [help-wanted issues](https://github.com/LintaoAmons/bookmarks.nvim/issues?q=state:open%20label:%22help%20wanted%22) to check the task you can help with.
-
-Most of them should have some hints about how we want to impl it.
-
-- Plugin Structure:
-  1. `plugin/bookmarks.lua` the entry point of the plugin
-  2. `lua/bookmarks/domain` where the main objects/concepts live
-
-## Self-Promotion
-
-- [my website](https://oatnil.top)
-- [my neovim config](https://github.com/LintaoAmons/VimEverywhere/tree/main/nvim)
-- [scratch.nvim](https://github.com/LintaoAmons/scratch.nvim)
-- [cd-project.nvim](https://github.com/LintaoAmons/cd-project.nvim)
-- [bookmarks.nvim](https://github.com/LintaoAmons/bookmarks.nvim)
-- [context-menu.nvim](https://github.com/LintaoAmons/context-menu.nvim)
-
-<a href="https://www.buymeacoffee.com/lintaoamond" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
