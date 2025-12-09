@@ -41,3 +41,6 @@ luac.out
 
 .aider*
 nvim-aider
+
+.specstory
+.nvim
