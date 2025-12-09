@@ -36,7 +36,6 @@ end
 ---@param node Bookmarks.Node
 ---@return string
 local function render_bookmark(node)
-  local order_prefix = (node.order or 0) .. ": "
   local linked_icon = #node.linked_bookmarks > 0 and "🔗" or ""
 
   local name = node.name
@@ -44,7 +43,7 @@ local function render_bookmark(node)
     name = "[Untitled]"
   end
 
-  return order_prefix .. name .. " " .. linked_icon
+  return name .. " " .. linked_icon
 end
 
 ---@param node Bookmarks.Node
@@ -103,7 +102,7 @@ local function render_tree_recursive(node, lines, lines_ctx, deep, root_id, acti
   -- For list nodes, only render children if expanded
   if node.type == "list" and node.is_expanded then
     local tree_ctx = Context.get_ctx()
-    local ascending = tree_ctx.sort_ascending or false
+    local ascending = tree_ctx.sort_ascending or true
     local sorted_children = sort_nodes_by_order(node.children, ascending)
     for _, child in ipairs(sorted_children) do
       render_tree_recursive(child, lines, lines_ctx, deep + 1, root_id, active_list_id)
