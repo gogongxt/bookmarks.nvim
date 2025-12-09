@@ -26,7 +26,7 @@ local function check_project_root_change()
     if vim.fn.isdirectory(nvim_dir) == 0 then
       vim.fn.mkdir(nvim_dir, "p")
     end
-    local db_path = nvim_dir .. "/bookmarks.sqlite.db"
+    local db_path = nvim_dir .. "/bookmarks.json"
 
     -- Reopen database with new path
     require("bookmarks.domain.repo").setup(db_path)

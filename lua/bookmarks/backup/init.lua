@@ -64,7 +64,7 @@ local function create_backup(db_path, backup_dir)
   end
 
   local timestamp = os.date("%Y%m%d_%H%M%S")
-  local backup_path = string.format("%s/bookmarks_%s.sqlite.db", backup_dir, timestamp)
+  local backup_path = string.format("%s/bookmarks_%s.json", backup_dir, timestamp)
   copy_file(db_path, backup_path)
   return backup_path
 end

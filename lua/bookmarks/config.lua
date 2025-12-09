@@ -34,7 +34,7 @@ local function get_db_path()
     end
   end
 
-  return nvim_dir .. "/bookmarks.sqlite.db"
+  return nvim_dir .. "/bookmarks.json"
 end
 
 ---@param user_config? Bookmarks.Config

@@ -22,7 +22,7 @@ function M.setup(signs)
   local mark = signs.mark
   vim.fn.sign_define(hl_name, { text = mark.icon, texthl = hl_name })
   if mark.color then
-    vim.api.nvim_set_hl(0, hl_name, { foreground = mark.color })
+    vim.api.nvim_set_hl(0, hl_name, { fg = mark.color })
   end
   if mark.line_bg then
     vim.api.nvim_set_hl(0, hl_name_line, { bg = mark.line_bg })
@@ -42,7 +42,7 @@ function M.place_sign(line, buf_number, desc)
   })
 
   -- Get the length of the current line
-  local line_length = #(vim.api.nvim_buf_get_lines(0, row, row + 1, false)[1] or "")
+  local line_length = #(vim.api.nvim_buf_get_lines(buf_number, row, row + 1, false)[1] or "")
   vim.api.nvim_buf_set_extmark(buf_number, ns, line - 1, 0, {
     end_row = row,
     end_col = line_length,
@@ -73,8 +73,8 @@ function M._refresh_signs(bookmarks)
 
   bookmarks = bookmarks or Node.get_all_bookmarks(active_list)
   local buf_number = vim.api.nvim_get_current_buf()
+  local filepath = vim.fn.expand("%:p")
   for _, bookmark in ipairs(bookmarks) do
-    local filepath = vim.fn.expand("%:p")
     if filepath == bookmark.location.path then
       local desc = vim.g.bookmarks_config.signs.desc_format(bookmark)
       pcall(M.place_sign, bookmark.location.line, buf_number, desc)

@@ -49,6 +49,10 @@
 ---@class Bookmarks.Config.Query
 ---@field keymap table Keymap configurations
 
+---@class Bookmarks.Config.Storage
+---@field format string Storage format: "json" (JSON file storage)
+---@field auto_save boolean Whether to automatically save after each operation
+
 ---@class Bookmarks.Config
 ---@field backup Bookmarks.Config.Backup Backup configurations
 ---@field navigation Bookmarks.Config.Navigation Navigation configurations
@@ -58,6 +62,7 @@
 ---@field commands table<string, function> Custom commands available in command picker
 ---@field treeview Bookmarks.Config.TreeView Tree view configurations
 ---@field query Bookmarks.Config.Query Query configurations
+---@field storage Bookmarks.Config.Storage Storage configurations
 
 return {
   backup = {
@@ -271,5 +276,13 @@ return {
     -- TOOD: allow user to customize keymap
     keymap = {},
     -- stylua: ignore end
+  },
+
+  -- Storage configurations
+  storage = {
+    -- Storage format: "json" for JSON file storage
+    format = "json",
+    -- Auto save after each operation for better data integrity
+    auto_save = true,
   },
 }
