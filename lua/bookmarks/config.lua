@@ -16,22 +16,9 @@ local function get_project_root()
   return project_root
 end
 
----Get the database file path from config or fallback
----@param db_dir? string Directory to store the database
+---Get the database file path for the project
 ---@return string
-local function get_db_path(db_dir)
-  if db_dir then
-    -- If custom db_dir is provided, use it (backward compatibility)
-    if vim.fn.isdirectory(db_dir) == 0 then
-      local ok = vim.fn.mkdir(db_dir, "p")
-      if ok == 0 then
-        error(string.format("Failed to create directory for database: %s", db_dir))
-      end
-    end
-    return vim.fn.fnamemodify(db_dir .. "/bookmarks.sqlite.db", ":p")
-  end
-
-  -- Default behavior: use project-level .bookmarks directory
+local function get_db_path()
   local project_root = get_project_root()
   if not project_root then
     error("Failed to determine project root")
@@ -57,14 +44,11 @@ local setup = function(user_config)
       or default_config
   vim.g.bookmarks_config = cfg
 
-  local db_path = get_db_path(cfg.db_dir)
+  local db_path = get_db_path()
+  local project_root = get_project_root()
 
   -- Set project root for relative path conversion
-  if not cfg.db_dir then -- Only use project-level logic when db_dir is not explicitly set
-    local project_root = get_project_root()
-    require("bookmarks.domain.repo").set_project_root(project_root)
-  end
-
+  require("bookmarks.domain.repo").set_project_root(project_root)
   require("bookmarks.domain.repo").setup(db_path)
   require("bookmarks.sign").setup(cfg.signs)
   require("bookmarks.auto-cmd").setup()

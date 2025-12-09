@@ -6,11 +6,6 @@ local current_project_root = nil
 
 ---Check if project root has changed and reinitialize if needed
 local function check_project_root_change()
-  -- Only check if using project-level databases (when db_dir is not set)
-  if not vim.g.bookmarks_config or vim.g.bookmarks_config.db_dir then
-    return
-  end
-
   -- Use current working directory as project root
   local project_root = vim.fn.fnamemodify(vim.fn.getcwd(), ":p")
 

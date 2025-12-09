@@ -21,10 +21,6 @@ end
 ---@param abs_path string The absolute path
 ---@return string The relative path
 local function to_relative_path(abs_path)
-  if not project_root then
-    return abs_path -- Fallback to absolute path if no project root
-  end
-
   -- Ensure project_root ends with /
   if not project_root:match("/$") then
     project_root = project_root .. "/"
@@ -43,8 +39,8 @@ end
 ---@param rel_path string The relative path
 ---@return string The absolute path
 local function to_absolute_path(rel_path)
-  if not project_root or rel_path:match("^/") then
-    return rel_path -- Already absolute or no project root
+  if rel_path:match("^/") then
+    return rel_path -- Already absolute path
   end
 
   return project_root .. rel_path
@@ -97,10 +93,10 @@ local DB
 M._DB = DB
 
 ---Initialize the database and create root node if it doesn't exist
----@param db_dir string Directory to store the database
-function M.setup(db_dir)
+---@param db_path string Path to the database file
+function M.setup(db_path)
   DB = sqlite({
-    uri = db_dir,
+    uri = db_path,
     nodes = nodes_tbl,
     node_relationships = node_relationships_tbl,
     active_list = active_list_tbl,

@@ -50,7 +50,6 @@
 ---@field keymap table Keymap configurations
 
 ---@class Bookmarks.Config
----@field db_dir? string Directory to store the database file
 ---@field backup Bookmarks.Config.Backup Backup configurations
 ---@field navigation Bookmarks.Config.Navigation Navigation configurations
 ---@field signs Bookmarks.Config.Signs Sign configurations
@@ -61,15 +60,6 @@
 ---@field query Bookmarks.Config.Query Query configurations
 
 return {
-  -- Directory to store the database file
-  -- Default: project-level .nvim directory (recommended)
-  -- When nil, each project will have its own .nvim/bookmarks.sqlite.db
-  -- You can set a custom directory for global behavior (old behavior)
-  -- The plugin will:
-  --   1. Create the directory if it doesn't exist
-  --   2. Create `bookmarks.sqlite.db` inside this directory
-  ---@type string?
-  db_dir = nil, -- if nil, use project-level .nvim/ directory
   backup = {
     enabled = false,
     -- Directory to store backup files
