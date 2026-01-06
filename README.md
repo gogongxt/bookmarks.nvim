@@ -93,10 +93,10 @@ Both pickers provide the same functionality with similar keybindings.
 | Shortcut | Action for bookmarks                       | Action for lists                 |
 | -------- | ------------------------------------------ | -------------------------------- |
 | `Enter`  | Go to selected bookmark                    | set selected list as active list |
-| `<C-x>`  | Open selected bookmark in horizontal split | -                                |
+| `<C-s>`  | Open selected bookmark in horizontal split | -                                |
 | `<C-v>`  | Open selected bookmark in vertical split   | -                                |
 | `<C-t>`  | Open selected bookmark in new tab          | -                                |
-| `<C-d>`  | Delete selected bookmark                   | Delete selected list             |
+| `<C-x>`  | Delete selected bookmark                   | Delete selected list             |
 
 and you can bind the commands to a shortcut or create a custom command out of it.
 

@@ -314,8 +314,8 @@ function M.pick_bookmark(callback, opts)
         input = {
           keys = {
             ["<CR>"] = { "confirm", mode = { "n", "i" } },
-            ["<C-d>"] = { "delete", mode = { "n", "i" } },
-            ["<C-x>"] = { "open_split", mode = { "n", "i" } },
+            ["<C-x>"] = { "delete", mode = { "n", "i" } },
+            ["<C-s>"] = { "open_split", mode = { "n", "i" } },
             ["<C-v>"] = { "open_vsplit", mode = { "n", "i" } },
             ["<C-t>"] = { "open_tab", mode = { "n", "i" } },
           },
@@ -323,8 +323,8 @@ function M.pick_bookmark(callback, opts)
         list = {
           keys = {
             ["<CR>"] = "confirm",
-            ["<C-d>"] = "delete",
-            ["<C-x>"] = "open_split",
+            ["<C-x>"] = "delete",
+            ["<C-s>"] = "open_split",
             ["<C-v>"] = "open_vsplit",
             ["<C-t>"] = "open_tab",
           },
@@ -333,8 +333,8 @@ function M.pick_bookmark(callback, opts)
           keys = {
             ["<CR>"] = "confirm",
             ["<2-LeftMouse>"] = "confirm",
-            ["<C-d>"] = "delete",
-            ["<C-x>"] = "open_split",
+            ["<C-x>"] = "delete",
+            ["<C-s>"] = "open_split",
             ["<C-v>"] = "open_vsplit",
             ["<C-t>"] = "open_tab",
           },

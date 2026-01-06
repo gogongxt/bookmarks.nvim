@@ -105,9 +105,10 @@ function M.pick_bookmark(callback, opts)
               actions.close(prompt_bufnr)
               callback(selected.value)
             end)
-            -- <C-x>	Go to file selection as a split
+            -- <C-s>	Go to file selection as a split
             -- <C-v>	Go to file selection as a vsplit
             -- <C-t>	Go to a file in a new tab
+            -- <C-x>	Delete bookmark
             actions.select_horizontal:replace(function()
               Actions.open_in_split(prompt_bufnr, nil)
             end)
@@ -120,7 +121,21 @@ function M.pick_bookmark(callback, opts)
               Actions.open_in_new_tab(prompt_bufnr, nil)
             end)
 
-            map("i", "<c-d>", function()
+            map("i", "<c-s>", function()
+              Actions.open_in_split(prompt_bufnr, nil)
+            end)
+
+            map("n", "<c-s>", function()
+              Actions.open_in_split(prompt_bufnr, nil)
+            end)
+
+            map("i", "<c-x>", function()
+              Actions.delete(prompt_bufnr, nil)
+              local active_list = Repo.ensure_and_get_active_list()
+              start_picker(Node.get_all_bookmarks(active_list), active_list)
+            end)
+
+            map("n", "<c-x>", function()
               Actions.delete(prompt_bufnr, nil)
               local active_list = Repo.ensure_and_get_active_list()
               start_picker(Node.get_all_bookmarks(active_list), active_list)

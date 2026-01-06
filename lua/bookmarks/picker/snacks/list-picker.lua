@@ -60,20 +60,20 @@ function M.pick_bookmark_list(callback, opts)
         input = {
           keys = {
             ["<CR>"] = { "confirm", mode = { "n", "i" } },
-            ["<C-d>"] = { "delete", mode = { "n", "i" } },
+            ["<C-x>"] = { "delete", mode = { "n", "i" } },
           },
         },
         list = {
           keys = {
             ["<CR>"] = "confirm",
-            ["<C-d>"] = "delete",
+            ["<C-x>"] = "delete",
           },
         },
         preview = {
           keys = {
             ["<CR>"] = "confirm",
             ["<2-LeftMouse>"] = "confirm",
-            ["<C-d>"] = "delete",
+            ["<C-x>"] = "delete",
           },
         },
       },

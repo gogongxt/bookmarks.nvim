@@ -50,7 +50,16 @@ function M.pick_bookmark_list(callback, opts)
             callback(selected.value)
           end)
 
-          map("i", "<c-d>", function()
+          -- <C-x>	Delete list
+          map("i", "<c-x>", function()
+            ---@type Bookmarks.Node
+            local selected = action_state.get_selected_entry().value
+            Service.delete_node(selected.id)
+            actions.close(prompt_bufnr)
+            start_picker(Repo.find_lists())
+          end)
+
+          map("n", "<c-x>", function()
             ---@type Bookmarks.Node
             local selected = action_state.get_selected_entry().value
             Service.delete_node(selected.id)
