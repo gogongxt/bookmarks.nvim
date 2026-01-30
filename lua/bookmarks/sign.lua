@@ -35,10 +35,11 @@ function M.place_sign(line, buf_number, desc)
   local at_end = -1
   local row = line - 1
   vim.api.nvim_buf_set_extmark(buf_number, ns, row, at_end, {
-    virt_text = { { "  " .. desc, hl_name } },
-    virt_text_pos = "overlay",
+    virt_text = { { "" .. desc, hl_name } },
+    virt_text_pos = "eol",
     hl_group = hl_name,
     hl_mode = "combine",
+    priority = 1000, -- Higher priority ensures bookmark appears before other virtual text
   })
 
   -- Get the length of the current line
