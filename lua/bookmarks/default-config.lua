@@ -17,13 +17,13 @@
 
 ---@class Bookmarks.Config.Picker
 ---@field sort_by string | fun(bookmarks: Bookmarks.Node[]): nil Sort logic for bookmark list
----@field entry_display? fun(bookmark: Bookmarks.Node, bookmarks: Bookmarks.Node[]): string Telescope entry display generation logic
+---@field entry_display? fun(bookmark: Bookmarks.Node, bookmarks: Bookmarks.Node[]): string Entry display generation logic
 
 ---@class Bookmarks.Config.Calibrate
 ---@field auto_calibrate_cur_buf boolean Auto adjust window position when opening buffer
 ---@field show_calibrate_logs boolean Show calibration logs
 
----@alias Bookmarks.KeymapAction "quit" | "refresh" | "create_list" | "level_up" | "set_root" | "set_active" | "toggle" | "move_up" | "move_down" | "delete" | "rename" | "goto" | "cut" | "copy" | "paste" | "show_info" | "reverse" | "preview" | "add_to_aider" | "add_to_aider_read_only" | "drop_from_aider" | "show_help"
+---@alias Bookmarks.KeymapAction "quit" | "refresh" | "create_list" | "level_up" | "set_root" | "set_active" | "toggle" | "move_up" | "move_down" | "delete" | "rename" | "goto" | "cut" | "copy" | "paste" | "show_info" | "reverse" | "preview" | "show_help"
 
 ---@alias Bookmarks.KeymapCustomAction fun(node: Bookmarks.Node, info: Bookmarks.ActionNodeInfo): nil
 
@@ -46,9 +46,6 @@
 ---@field keymap table<string, Bookmarks.Config.TreeView.Keymap.Entry> Keymap configurations
 ---@field window_split_dimension number Dimension of the window spawned for Treeview
 
----@class Bookmarks.Config.Query
----@field keymap table Keymap configurations
-
 ---@class Bookmarks.Config.Storage
 ---@field format string Storage format: "json" (JSON file storage)
 ---@field auto_save boolean Whether to automatically save after each operation
@@ -61,7 +58,6 @@
 ---@field calibrate Bookmarks.Config.Calibrate Calibration configurations
 ---@field commands table<string, function> Custom commands available in command picker
 ---@field treeview Bookmarks.Config.TreeView Tree view configurations
----@field query Bookmarks.Config.Query Query configurations
 ---@field storage Bookmarks.Config.Storage Storage configurations
 
 return {
@@ -95,19 +91,16 @@ return {
     end,
   },
 
-  -- Telescope/picker configurations
+  -- Picker configurations
   picker = {
     -- Sort logic for bookmark list
     -- Built-in options: "last_visited", "created_date"
     -- Or provide custom sort function
     ---@type: string | fun(bookmarks: Bookmarks.Node[]): nil
     sort_by = "last_visited",
-    -- telescope entry display generation logic
+    -- entry display generation logic
     ---@type: nil | fun(bookmark: Bookmarks.Node, bookmarks: Bookmarks.Node[]): string
     entry_display = nil,
-    -- Picker type to use: "telescope" or "snacks"
-    ---@type: "telescope" | "snacks"
-    type = "telescope",
   },
 
   -- Bookmark position calibration
@@ -239,18 +232,6 @@ return {
         action = "preview",
         desc = "Preview bookmark content"
       },
-      ["+"] = {
-        action = "add_to_aider",
-        desc = "Add to Aider"
-      },
-      ["="] = {
-        action = "add_to_aider_read_only",
-        desc = "Add to Aider as read-only"
-      },
-      ["-"] = {
-        action = "drop_from_aider",
-        desc = "Drop from Aider"
-      },
       ["?"] = {
         action = "show_help",
         desc = "Show help panel with available keymaps"
@@ -268,13 +249,6 @@ return {
     },
     -- Dimension of the window spawned for Treeview
     window_split_dimension = 30,
-    -- stylua: ignore end
-  },
-
-  query = {
-    -- Stylua: ignore start
-    -- TOOD: allow user to customize keymap
-    keymap = {},
     -- stylua: ignore end
   },
 

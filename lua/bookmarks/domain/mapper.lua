@@ -1,6 +1,6 @@
 local M = {}
 
----convert a database row to a bookmark node
+---convert a data record to a bookmark node
 ---@param row table
 ---@return Bookmarks.Node
 M.row_to_node = function(row)

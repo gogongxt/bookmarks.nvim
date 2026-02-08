@@ -18,18 +18,18 @@ local function check_project_root_change()
   if current_project_root ~= project_root then
     current_project_root = project_root
 
-    -- Reinitialize the database with new project root
+    -- Reinitialize the storage with new project root
     require("bookmarks.domain.repo").set_project_root(project_root)
 
-    -- Recalculate database path
+    -- Recalculate storage path
     local nvim_dir = project_root .. ".nvim"
     if vim.fn.isdirectory(nvim_dir) == 0 then
       vim.fn.mkdir(nvim_dir, "p")
     end
-    local db_path = nvim_dir .. "/bookmarks.json"
+    local storage_path = nvim_dir .. "/bookmarks.json"
 
-    -- Reopen database with new path
-    require("bookmarks.domain.repo").setup(db_path)
+    -- Reopen storage with new path
+    require("bookmarks.domain.repo").setup(storage_path)
 
     -- Refresh signs for new project
     require("bookmarks.sign").safe_refresh_signs()

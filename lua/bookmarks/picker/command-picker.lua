@@ -1,15 +1,9 @@
 local Command = require("bookmarks.commands")
 
-local has_telescope, _ = pcall(require, "telescope")
-if not has_telescope then
-  error("This picker requires telescope.nvim to be installed")
+local has_snacks, snacks = pcall(require, "snacks")
+if not has_snacks then
+  error("This picker requires snacks.nvim to be installed")
 end
-
-local pickers = require("telescope.pickers")
-local finders = require("telescope.finders")
-local actions = require("telescope.actions")
-local conf = require("telescope.config").values
-local action_state = require("telescope.actions.state")
 
 local M = {}
 
@@ -29,34 +23,50 @@ function M.pick_commands(opts)
     end
   end
 
-  pickers
-    .new(opts, {
-      prompt_title = opts.prompt or "Bookmarks Commands",
-      finder = finders.new_table({
-        results = commands,
-        entry_maker = function(command)
-          return {
-            value = command,
-            display = command.name,
-            ordinal = command.name,
-          }
-        end,
-      }),
-      sorter = conf.generic_sorter(opts),
-      attach_mappings = function(prompt_bufnr, map)
-        actions.select_default:replace(function()
-          actions.close(prompt_bufnr)
-          local selected = action_state.get_selected_entry()
-          if selected == nil then
-            return
-          end
-          selected.value.execute()
-        end)
-
-        return true
-      end,
+  -- Convert commands to snacks picker items
+  local items = {}
+  for _, command in ipairs(commands) do
+    table.insert(items, {
+      text = command.name,
+      command = command,
     })
-    :find()
+  end
+
+  local picker_opts = {
+    prompt = opts.prompt or "Bookmarks Commands",
+    items = items,
+    format = function(item)
+      return { { item.text } }
+    end,
+    actions = {
+      confirm = function(picker)
+        local selected = picker:selected()[1]
+        if selected then
+          picker:close()
+          selected.command.execute()
+        end
+      end,
+    },
+    win = {
+      input = {
+        keys = {
+          ["<CR>"] = { "confirm", mode = { "n", "i" } },
+        },
+      },
+      list = {
+        keys = {
+          ["<CR>"] = "confirm",
+        },
+      },
+      preview = {
+        keys = {
+          ["<CR>"] = "confirm",
+        },
+      },
+    },
+  }
+
+  snacks.picker(picker_opts)
 end
 
 return M

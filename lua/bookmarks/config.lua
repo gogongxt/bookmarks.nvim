@@ -16,9 +16,9 @@ local function get_project_root()
   return project_root
 end
 
----Get the database file path for the project
+---Get the bookmarks storage file path for the project
 ---@return string
-local function get_db_path()
+local function get_storage_path()
   local project_root = get_project_root()
   if not project_root then
     error("Failed to determine project root")
@@ -44,15 +44,15 @@ local setup = function(user_config)
       or default_config
   vim.g.bookmarks_config = cfg
 
-  local db_path = get_db_path()
+  local storage_path = get_storage_path()
   local project_root = get_project_root()
 
   -- Set project root for relative path conversion
   require("bookmarks.domain.repo").set_project_root(project_root)
-  require("bookmarks.domain.repo").setup(db_path)
+  require("bookmarks.domain.repo").setup(storage_path)
   require("bookmarks.sign").setup(cfg.signs)
   require("bookmarks.auto-cmd").setup()
-  require("bookmarks.backup").setup(cfg, db_path)
+  require("bookmarks.backup").setup(cfg, storage_path)
 end
 
 return {

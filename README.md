@@ -1,8 +1,8 @@
 # Bookmarks.nvim
 
 - Simple: Add, Rename and Remove bookmarks with only one command, less shortcuts more productivity.
-- Persistent: save your bookmarks into a sqlite db file
-- Accessible: Find your bookmark by telescope, snacks, or Treeview with ease.
+- Persistent: save your bookmarks into a JSON file
+- Accessible: Find your bookmark by snacks picker or Treeview with ease.
 - Informative: mark with a name or description, so you can record more information.
 - Visibility: display icon and name at the marked lines, and highlight marked lines.
 - Lists: arrange your bookmarks in lists, organise the bookmarks in your way.
@@ -38,18 +38,13 @@
 return {
   "LintaoAmons/bookmarks.nvim",
   -- pin the plugin at specific version for stability
-  -- backup your bookmark sqlite db when there are breaking changes (major version change)
-  tag = "3.2.0",
+  -- backup your bookmark data when there are breaking changes (major version change)
   dependencies = {
-    {"kkharji/sqlite.lua"},
-    {"nvim-telescope/telescope.nvim"},  -- telescope picker support
-    {"folke/snacks.nvim"},  -- snacks picker support (alternative to telescope)
-    {"stevearc/dressing.nvim"}, -- optional: better UI
-    {"GeorgesAlkhouri/nvim-aider"} -- optional: for Aider integration
+    {"folke/snacks.nvim"},  -- snacks picker support
   },
   config = function()
     local opts = {} -- check the "./lua/bookmarks/default-config.lua" file for all the options
-    require("bookmarks").setup(opts) -- you must call setup to init sqlite db
+    require("bookmarks").setup(opts) -- you must call setup to init
   end,
 }
 
@@ -58,23 +53,6 @@ return {
 
 > Check the [default-config.lua](./lua/bookmarks/default-config.lua) file for all the configuration options.
 
-> For Windows users, if you encounter sqlite dependency issues, please refer to https://github.com/LintaoAmons/bookmarks.nvim/issues/73 for potential solutions.
-
-## Picker Configuration
-
-By default, the plugin uses telescope.nvim for fuzzy finding. You can also configure it to use snacks.nvim instead:
-
-```lua
-local opts = {
-  picker = {
-    type = "snacks",  -- or "telescope" (default)
-  }
-}
-require("bookmarks").setup(opts)
-```
-
-Both pickers provide the same functionality with similar keybindings.
-
 ## Usage
 
 ### Basic Bookmark Operations
@@ -82,13 +60,13 @@ Both pickers provide the same functionality with similar keybindings.
 | Command             | Description                                                                                                                         |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | `BookmarksMark`     | Mark current line into active BookmarkList. Rename existing bookmark under cursor. Toggle it off if the new name is an empty string |
-| `BookmarksGoto`     | Go to bookmark at current active BookmarkList with the configured picker (telescope or snacks)                                      |
+| `BookmarksGoto`     | Go to bookmark at current active BookmarkList with the snacks picker                                                                |
 | `BookmarksNewList`  | Create a new bookmark list, but I normally use `BookmarksTree` to create new list                                                   |
-| `BookmarksLists`    | Pick a bookmark list with the configured picker (telescope or snacks)                                                               |
+| `BookmarksLists`    | Pick a bookmark list with the snacks picker                                                                                         |
 | `BookmarksCommands` | Find bookmark commands and trigger it                                                                                               |
 
 > [!NOTE]
-> Those Telescope shortcuts are also available
+> Picker shortcuts for bookmarks:
 
 | Shortcut | Action for bookmarks                       | Action for lists                 |
 | -------- | ------------------------------------------ | -------------------------------- |
@@ -108,7 +86,7 @@ vim.keymap.set({ "n", "v" }, "Bd", function() require("bookmarks.commands").dele
 vim.api.nvim_create_user_command("BookmarksClearCurrentFile", function() require("bookmarks.commands").delete_mark_of_current_file() end, {})
 ```
 
-Change the `name_of_the_command_function` to the one you want to use, you can find all the names goes alone with the plugin in [https://github.com/LintaoAmons/bookmarks.nvim/blob/better-treeview-visual/lua/bookmarks/commands/init.lua](https://github.com/LintaoAmons/bookmarks.nvim/blob/main/lua/bookmarks/commands/init.lua)
+Change the `name_of_the_command_function` to the one you want to use, you can find all the names goes alone with the plugin in [https://github.com/LintaoAmons/bookmarks.nvim/blob/main/lua/bookmarks/commands/init.lua](https://github.com/LintaoAmons/bookmarks.nvim/blob/main/lua/bookmarks/commands/init.lua)
 
 And you can also extend the plugin by creating your own custom commands and put them into the config.
 

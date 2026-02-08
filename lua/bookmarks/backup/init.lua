@@ -53,26 +53,26 @@ local function copy_file(src, dst)
   uv.fs_close(dest)
 end
 
----Create backup of database file
----@param db_path string Path to database file
+---Create backup of bookmarks storage file
+---@param storage_path string Path to bookmarks JSON file
 ---@param backup_dir string Path to backup directory
 ---@return string|nil # Backup file path or nil if backup failed
-local function create_backup(db_path, backup_dir)
+local function create_backup(storage_path, backup_dir)
   -- Check if source file exists
-  if fn.filereadable(db_path) == 0 then
+  if fn.filereadable(storage_path) == 0 then
     return
   end
 
   local timestamp = os.date("%Y%m%d_%H%M%S")
   local backup_path = string.format("%s/bookmarks_%s.json", backup_dir, timestamp)
-  copy_file(db_path, backup_path)
+  copy_file(storage_path, backup_path)
   return backup_path
 end
 
 ---Setup backup with 5-minute delay
 ---@param config table
----@param db_path string
-function M.setup(config, db_path)
+---@param storage_path string Path to bookmarks JSON file
+function M.setup(config, storage_path)
   if not config.backup.enabled then
     return
   end
@@ -87,7 +87,7 @@ function M.setup(config, db_path)
     -- 5, -- For testing
     0,
     vim.schedule_wrap(function()
-      create_backup(db_path, backup_dir)
+      create_backup(storage_path, backup_dir)
       timer:close()
     end)
   )

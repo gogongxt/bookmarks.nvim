@@ -62,7 +62,10 @@ function M.get_info()
   table.insert(sections, "## Statistics\n")
   table.insert(sections, string.format("- Total Bookmarks: `%d`\n", #all_bookmarks))
   table.insert(sections, string.format("- Total Lists: `%d`\n", #all_lists))
-  table.insert(sections, string.format("- Database Location: `%s`\n", Repo._DB.uri))
+  local storage_path = Repo.get_file_path()
+  if storage_path then
+    table.insert(sections, string.format("- Storage Location: `%s`\n", storage_path))
+  end
   local backup_dir = Backup.get_backup_dir(config.backup.dir)
   table.insert(sections, string.format("- Backup Location: `%s`\n", backup_dir))
 
@@ -142,30 +145,6 @@ function M.show_bookmark_info(node)
 
     if node.visited_at then
       table.insert(sections, string.format("- **Last Visited**: `%s`\n", os.date("%Y-%m-%d %H:%M:%S", node.visited_at)))
-    end
-
-    -- Add linked bookmarks information (outgoing links)
-    if node.type == "bookmark" then
-      local linked_out = Service.get_linked_out_bookmarks(node.id)
-      table.insert(sections, "\n## Linked Bookmarks (Outgoing)\n")
-      if #linked_out > 0 then
-        for i, linked in ipairs(linked_out) do
-          table.insert(sections, string.format("- %d. %s (%s:%d)\n", i, linked.name, vim.fn.fnamemodify(linked.location.path, ":t"), linked.location.line))
-        end
-      else
-        table.insert(sections, "- None\n")
-      end
-      
-      -- Add incoming links information
-      local linked_in = Service.get_linked_in_bookmarks(node.id)
-      table.insert(sections, "\n## Linked Bookmarks (Incoming)\n")
-      if #linked_in > 0 then
-        for i, linked in ipairs(linked_in) do
-          table.insert(sections, string.format("- %d. %s (%s:%d)\n", i, linked.name, vim.fn.fnamemodify(linked.location.path, ":t"), linked.location.line))
-        end
-      else
-        table.insert(sections, "- None\n")
-      end
     end
 
     if node.description then

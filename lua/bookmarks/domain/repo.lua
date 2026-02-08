@@ -15,10 +15,10 @@ function M.set_project_root(root)
 end
 
 ---Initialize the file-based storage and create root node if it doesn't exist
----@param db_path string Path to the database file (will be converted to .json)
-function M.setup(db_path)
-  -- Convert .db to .json file extension
-  local json_path = db_path:gsub("%.db$", ".json")
+---@param storage_path string Path to the storage file (will use .json extension)
+function M.setup(storage_path)
+  -- Convert to .json file extension if needed
+  local json_path = storage_path:gsub("%.db$", ".json")
   file_path = json_path
   M.load_data()
   M._DB = M
@@ -48,8 +48,7 @@ function M.load_data()
     updated_at = os.time(),
     next_id = 1,
     active_list_id = 0,
-    nodes = {},
-    bookmark_links = {}
+    nodes = {}
   }
 
   -- Create root node
@@ -62,6 +61,18 @@ function M.load_data()
     is_expanded = true,
     children = {}
   }
+end
+
+---Get the current data (for query module)
+---@return table
+function M.get_data()
+  return data
+end
+
+---Get the storage file path (for info display)
+---@return string?
+function M.get_file_path()
+  return file_path
 end
 
 ---Save data to file
@@ -359,11 +370,6 @@ function M.delete_node(node_id)
       parent_node.children = new_children
     end
   end
-
-  -- Remove bookmark links
-  data.bookmark_links = vim.tbl_filter(function(link)
-    return link.bookmark_id ~= node_id and link.linked_bookmark_id ~= node_id
-  end, data.bookmark_links)
 
   -- Remove the node itself
   data.nodes[node_str] = nil
@@ -746,67 +752,6 @@ function M.rebind_orphan_node()
   end
 
   M.save_data()
-end
-
----Link two bookmarks
----@param bookmark_id number
----@param linked_bookmark_id number
-function M.link_bookmarks(bookmark_id, linked_bookmark_id)
-  if bookmark_id == linked_bookmark_id then
-    return
-  end
-
-  -- Check if link already exists
-  for _, link in ipairs(data.bookmark_links) do
-    if link.bookmark_id == bookmark_id and link.linked_bookmark_id == linked_bookmark_id then
-      return -- Already linked
-    end
-  end
-
-  table.insert(data.bookmark_links, {
-    bookmark_id = bookmark_id,
-    linked_bookmark_id = linked_bookmark_id,
-    created_at = os.time()
-  })
-
-  M.save_data()
-end
-
----Unlink two bookmarks
----@param bookmark_id number
----@param linked_bookmark_id number
-function M.unlink_bookmarks(bookmark_id, linked_bookmark_id)
-  data.bookmark_links = vim.tbl_filter(function(link)
-    return not (link.bookmark_id == bookmark_id and link.linked_bookmark_id == linked_bookmark_id)
-  end, data.bookmark_links)
-
-  M.save_data()
-end
-
----Get outgoing linked bookmark IDs for a given bookmark
----@param bookmark_id number
----@return number[]
-function M.get_linked_out_bookmarks(bookmark_id)
-  local linked_ids = {}
-  for _, link in ipairs(data.bookmark_links) do
-    if link.bookmark_id == bookmark_id then
-      table.insert(linked_ids, link.linked_bookmark_id)
-    end
-  end
-  return linked_ids
-end
-
----Get incoming linked bookmark IDs for a given bookmark
----@param bookmark_id number
----@return number[]
-function M.get_linked_in_bookmarks(bookmark_id)
-  local linked_ids = {}
-  for _, link in ipairs(data.bookmark_links) do
-    if link.linked_bookmark_id == bookmark_id then
-      table.insert(linked_ids, link.bookmark_id)
-    end
-  end
-  return linked_ids
 end
 
 return M
