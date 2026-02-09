@@ -391,8 +391,9 @@ function M.grep_bookmark(opts)
   snacks.picker(
     "grep",
     vim.tbl_extend("force", {
-      prompt = "Grep Bookmarked Files",
-      search_dirs = files,
+      prompt = " ",
+      dirs = files,
+      regex = false,
     }, opts)
   )
 end
