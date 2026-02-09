@@ -22,11 +22,11 @@ local function check_project_root_change()
     require("bookmarks.domain.repo").set_project_root(project_root)
 
     -- Recalculate storage path
-    local nvim_dir = project_root .. ".nvim"
-    if vim.fn.isdirectory(nvim_dir) == 0 then
-      vim.fn.mkdir(nvim_dir, "p")
+    local bookmarks_dir = project_root .. ".nvim/bookmarks"
+    if vim.fn.isdirectory(bookmarks_dir) == 0 then
+      vim.fn.mkdir(bookmarks_dir, "p")
     end
-    local storage_path = nvim_dir .. "/bookmarks.json"
+    local storage_path = bookmarks_dir .. "/bookmarks.json"
 
     -- Reopen storage with new path
     require("bookmarks.domain.repo").setup(storage_path)

@@ -15,7 +15,7 @@ The plugin follows a clean domain-driven architecture with clear separation of c
 **`lua/bookmarks/domain/`** - Core business logic and data models:
 - `node.lua` - Core data structure (`Bookmarks.Node` type). Nodes can be either "lists" (containers) or "bookmarks" (actual line marks)
 - `service.lua` - Business logic for all bookmark operations (mark, delete, rename, navigate, etc.)
-- `repo.lua` - Data persistence layer (JSON file storage at `.nvim/bookmarks.json`)
+- `repo.lua` - Data persistence layer (JSON file storage at `.nvim/bookmarks/bookmarks.json`)
 - `location.lua` - File path handling with project-relative path support
 
 **Key Concept**: Everything is a `Node`. Lists contain bookmarks. Bookmarks have an `order` field for positioning. There's always an "active list" that new bookmarks are added to.
@@ -122,7 +122,7 @@ Important: The `storage` config controls whether data is saved to JSON (current 
 ## Storage System
 
 The plugin uses JSON file storage:
-- Format: JSON file at `.nvim/bookmarks.json` (relative to project root)
+- Format: JSON file at `.nvim/bookmarks/bookmarks.json` (relative to project root)
 - Config: `storage.format = "json"`
 - Repository: `lua/bookmarks/domain/repo.lua` handles JSON serialization
 - Auto-save: `storage.auto_save = true` saves after each operation
@@ -161,4 +161,4 @@ Add custom functions to `config.treeview.keymap`:
 - `lua/bookmarks/picker/` - Snacks.nvim picker integration
 - `lua/bookmarks/tree/` - TreeView UI
 - `lua/bookmarks/commands/` - User-callable commands
-- `lua/bookmarks/data/` - Runtime data storage (bookmarks.json)
+- `lua/bookmarks/data/` - Runtime data storage (.nvim/bookmarks/bookmarks.json)

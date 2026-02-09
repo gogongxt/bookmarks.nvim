@@ -53,6 +53,9 @@ return {
 
 > Check the [default-config.lua](./lua/bookmarks/default-config.lua) file for all the configuration options.
 
+> [!NOTE]
+> **Data Storage**: By default, bookmark data is stored in `.nvim/bookmarks/bookmarks.json` in your project root directory. The `.nvim/bookmarks` directory will be created automatically if it doesn't exist. You can check the current storage path by running `:lua print(require("bookmarks.domain.repo").get_file_path())` in Neovim.
+
 ## Usage
 
 ### Basic Bookmark Operations

@@ -24,17 +24,17 @@ local function get_storage_path()
     error("Failed to determine project root")
   end
 
-  local nvim_dir = project_root .. ".nvim"
+  local bookmarks_dir = project_root .. ".nvim/bookmarks"
 
-  -- Create .nvim directory if it doesn't exist
-  if vim.fn.isdirectory(nvim_dir) == 0 then
-    local ok = vim.fn.mkdir(nvim_dir, "p")
+  -- Create .nvim/bookmarks directory if it doesn't exist
+  if vim.fn.isdirectory(bookmarks_dir) == 0 then
+    local ok = vim.fn.mkdir(bookmarks_dir, "p")
     if ok == 0 then
-      error(string.format("Failed to create .nvim directory: %s", nvim_dir))
+      error(string.format("Failed to create .nvim/bookmarks directory: %s", bookmarks_dir))
     end
   end
 
-  return nvim_dir .. "/bookmarks.json"
+  return bookmarks_dir .. "/bookmarks.json"
 end
 
 ---@param user_config? Bookmarks.Config
