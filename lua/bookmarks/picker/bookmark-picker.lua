@@ -204,7 +204,7 @@ function M.pick_bookmark(callback, opts)
 
     -- Create safe prompt
     local list_name = list and type(list.name) == "string" and list.name or "Unknown"
-    local prompt = "Bookmarks in [" .. list_name .. "] "
+    local prompt = "Bookmarks [" .. list_name .. "] "
 
     local picker_opts = {
       prompt = prompt,
