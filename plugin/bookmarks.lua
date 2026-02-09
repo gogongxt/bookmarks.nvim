@@ -19,7 +19,8 @@ local bookmarks = require("bookmarks")
 local Commands = require("bookmarks.commands")
 
 vim.api.nvim_create_user_command("BookmarksMark", bookmarks.toggle_mark, {
-  desc = "Mark current line into active BookmarkList. Rename existing bookmark under cursor. Toggle it off if the new name is an empty string",
+  desc =
+  "Mark current line into active BookmarkList. Rename existing bookmark under cursor. Toggle it off if the new name is an empty string",
 })
 
 vim.api.nvim_create_user_command("BookmarksDesc", bookmarks.attach_desc, {
@@ -91,4 +92,22 @@ vim.api.nvim_create_user_command(
   "BookmarkRebindOrphanNode",
   bookmarks.rebind_orphan_node,
   { desc = "rebind the orphaned node to the root node" }
+)
+
+vim.api.nvim_create_user_command(
+  "BookmarksSignEnable",
+  bookmarks.sign_enable,
+  { desc = "Enable bookmark signs display" }
+)
+
+vim.api.nvim_create_user_command(
+  "BookmarksSignDisable",
+  bookmarks.sign_disable,
+  { desc = "Disable bookmark signs display" }
+)
+
+vim.api.nvim_create_user_command(
+  "BookmarksSignToggle",
+  bookmarks.sign_toggle,
+  { desc = "Toggle bookmark signs display" }
 )

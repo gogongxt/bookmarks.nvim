@@ -20,7 +20,7 @@ M.toggle_mark = function()
     prompt = prompt,
     default = default_name,
   }, function(input)
-    if input ~= nil then  -- input is nil only if user cancels
+    if input ~= nil then -- input is nil only if user cancels
       Service.toggle_mark(input)
       Sign.safe_refresh_signs()
       pcall(Tree.refresh)
@@ -72,7 +72,6 @@ M.goto_prev_list_bookmark = function()
     end
   end)
 end
-
 
 M.grep_bookmarks = function()
   require("bookmarks.picker").grep_bookmark()
@@ -145,6 +144,28 @@ end
 
 M.rebind_orphan_node = function()
   Repo.rebind_orphan_node()
+end
+
+---Enable bookmark signs display
+M.sign_enable = function()
+  Sign.enable()
+  vim.notify("Bookmarks signs enabled", vim.log.levels.INFO)
+end
+
+---Disable bookmark signs display
+M.sign_disable = function()
+  Sign.disable()
+  vim.notify("Bookmarks signs disabled", vim.log.levels.INFO)
+end
+
+---Toggle bookmark signs display
+M.sign_toggle = function()
+  local new_state = Sign.toggle()
+  if new_state then
+    vim.notify("Bookmarks signs enabled", vim.log.levels.INFO)
+  else
+    vim.notify("Bookmarks signs disabled", vim.log.levels.INFO)
+  end
 end
 
 return M

@@ -142,6 +142,9 @@ keymap = {
 | `BookmarksInfo`                | Overview plugin current status                                                   |
 | `BookmarksInfoCurrentBookmark` | Show current bookmark info                                                       |
 | `BookmarkRebindOrphanNode`     | Rebind orphaned nodes by attaching them to the root node                         |
+| `BookmarksSignEnable`          | Enable bookmark signs display (icon and highlight on marked lines)               |
+| `BookmarksSignDisable`         | Disable bookmark signs display                                                   |
+| `BookmarksSignToggle`          | Toggle bookmark signs display on/off                                             |
 
 ### Keymap
 

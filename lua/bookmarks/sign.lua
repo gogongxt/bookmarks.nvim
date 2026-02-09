@@ -17,6 +17,9 @@ local ns = vim.api.nvim_create_namespace(ns_name)
 
 local M = {}
 
+-- Track whether bookmark signs are enabled
+M.enabled = true
+
 ---@param signs Signs
 function M.setup(signs)
   local mark = signs.mark
@@ -27,6 +30,35 @@ function M.setup(signs)
   if mark.line_bg then
     vim.api.nvim_set_hl(0, hl_name_line, { bg = mark.line_bg })
   end
+end
+
+---Enable bookmark signs display
+function M.enable()
+  M.enabled = true
+  M.safe_refresh_signs()
+end
+
+---Disable bookmark signs display
+function M.disable()
+  M.enabled = false
+  M.clean()
+end
+
+---Toggle bookmark signs display
+---@return boolean new_state - The new enabled state
+function M.toggle()
+  if M.enabled then
+    M.disable()
+  else
+    M.enable()
+  end
+  return M.enabled
+end
+
+---Check if bookmark signs are enabled
+---@return boolean
+function M.is_enabled()
+  return M.enabled
 end
 
 ---@param line number
@@ -69,6 +101,11 @@ end
 ---@param bookmarks? Bookmarks.Node[]
 function M._refresh_signs(bookmarks)
   M.clean()
+
+  -- Don't show signs if disabled
+  if not M.enabled then
+    return
+  end
 
   local active_list = Repo.ensure_and_get_active_list()
 
