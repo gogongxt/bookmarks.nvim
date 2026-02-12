@@ -1,8 +1,3 @@
----@class Bookmarks.Config.Backup
----@field enabled boolean Whether backup is enabled
----@field dir? string Directory to store backup files
----@field delay number Delay in minutes before nvim opened
-
 ---@class Bookmarks.Config.Navigation
 ---@field next_prev_wraparound_same_file boolean Enable/disable wrap-around when navigating
 
@@ -47,7 +42,6 @@
 ---@field auto_save boolean Whether to automatically save after each operation
 
 ---@class Bookmarks.Config
----@field backup Bookmarks.Config.Backup Backup configurations
 ---@field navigation Bookmarks.Config.Navigation Navigation configurations
 ---@field signs Bookmarks.Config.Signs Sign configurations
 ---@field picker Bookmarks.Config.Picker Picker configurations
@@ -56,16 +50,6 @@
 ---@field storage Bookmarks.Config.Storage Storage configurations
 
 return {
-  backup = {
-    enabled = false,
-    -- Directory to store backup files
-    -- Default: vim.fn.stdpath("data").."/bookmarks.backup"
-    -- You can set a custom directory
-    ---@type string?
-    dir = nil,
-    delay = 5, -- Delay in minutes before nvim opened, no back will be created if nvim earlier than the actually backup time
-  },
-
   -- Navigation configurations
   navigation = {
     -- Enable/disable wrap-around when navigating to next/previous bookmark within the same file

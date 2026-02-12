@@ -52,7 +52,6 @@ local setup = function(user_config)
   require("bookmarks.domain.repo").setup(storage_path)
   require("bookmarks.sign").setup(cfg.signs)
   require("bookmarks.auto-cmd").setup()
-  require("bookmarks.backup").setup(cfg, storage_path)
 end
 
 return {

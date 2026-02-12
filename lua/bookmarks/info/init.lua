@@ -1,7 +1,6 @@
 local Repo = require("bookmarks.domain.repo")
 local Window = require("bookmarks.utils.window")
 local Location = require("bookmarks.domain.location")
-local Backup = require("bookmarks.backup")
 local Service = require("bookmarks.domain.service")
 
 local M = {}
@@ -66,8 +65,6 @@ function M.get_info()
   if storage_path then
     table.insert(sections, string.format("- Storage Location: `%s`\n", storage_path))
   end
-  local backup_dir = Backup.get_backup_dir(config.backup.dir)
-  table.insert(sections, string.format("- Backup Location: `%s`\n", backup_dir))
 
   -- Configuration section
   table.insert(sections, "## Configuration\n")

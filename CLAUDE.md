@@ -33,7 +33,6 @@ The plugin follows a clean domain-driven architecture with clear separation of c
 - **`tree/`** - TreeView UI implementation with hierarchical display and rich keybindings
 - **`commands/`** - Command palette and exposed command functions
 - **`integrate/`** - External tool integrations (Aider AI coding assistant)
-- **`backup/`** - Automatic backup system
 - **`utils/`** - Shared utilities
 
 ## Development Workflow
