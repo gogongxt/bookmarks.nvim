@@ -17,8 +17,8 @@ local function setup_highlights()
   if is_dark then
     -- 暗色主题配色
     vim.api.nvim_set_hl(0, "BookmarksName", {
-      fg = "#82AAFF", -- 明亮蓝色
-      bold = true,
+      fg = "red",
+      bold = false,
     })
 
     vim.api.nvim_set_hl(0, "BookmarksFile", {
@@ -27,8 +27,8 @@ local function setup_highlights()
   else
     -- 亮色主题配色
     vim.api.nvim_set_hl(0, "BookmarksName", {
-      fg = "#1976D2", -- 深蓝色
-      bold = true,
+      fg = "red",
+      bold = false,
     })
 
     vim.api.nvim_set_hl(0, "BookmarksFile", {
@@ -186,8 +186,9 @@ function M.pick_bookmark(callback, opts)
               text = display_text, -- 使用纯字符串格式，支持搜索
               bookmark_id = bookmark.id,
               file = normalized_path,
-              line = line_num, -- snacks picker 使用的字段
-              col = col_num,   -- snacks picker 使用的字段
+              ft = vim.filetype.match({ filename = filename }), -- 添加文件类型用于语法高亮
+              line = line_num,                                  -- snacks picker 使用的字段
+              col = col_num,                                    -- snacks picker 使用的字段
               -- 关键：添加 pos 字段支持 preview 定位
               pos = { line_num, col_num },
               -- Add extra fields for better preview support
@@ -195,6 +196,8 @@ function M.pick_bookmark(callback, opts)
               -- 添加额外字段用于自定义格式化
               file_with_line = file_with_line,
               bookmark_name = name,
+              filename = filename,
+              line_num = line_num,
               line_content = line_content,
             })
           end
@@ -210,16 +213,65 @@ function M.pick_bookmark(callback, opts)
       prompt = prompt,
       items = items,
       format = function(item)
-        -- 自定义格式化：重新构建彩色显示
-        if item.file_with_line and item.bookmark_name and item.line_content then
-          -- 构建带颜色的显示文本
-          local display_parts = {
-            { item.file_with_line, "BookmarksFile" }, -- 第一列：文件名:行号（绿色）
-            { " ",                 "Normal" },        -- 空格分隔
-            { item.bookmark_name,  "BookmarksName" }, -- 第二列：书签名称（蓝色）
-            { " ",                 "Normal" },        -- 空格分隔
-            { item.line_content,   "Normal" },        -- 第三列：代码内容（默认颜色）
-          }
+        -- 自定义格式化：和 grep picker 保持一致的样式
+        if item.file and item.line_num and item.bookmark_name and item.line_content then
+          -- 获取文件类型图标
+          local icon, icon_hl = Snacks.util.icon(item.file, "file", {
+            fallback = { file = "󰈔 " },
+          })
+
+          local display_parts = {}
+
+          -- 1. 文件类型 icon
+          if icon then
+            table.insert(display_parts, { icon .. " ", icon_hl or "SnacksPickerFile" })
+          end
+
+          -- 2. 文件路径（使用 resolve 函数处理路径截断和颜色）
+          table.insert(display_parts, {
+            "",
+            resolve = function(max_width)
+              local truncpath = Snacks.picker.util.truncpath(
+                item.file,
+                math.max(max_width, 40),
+                { cwd = vim.fn.getcwd(), kind = "center" }
+              )
+              local dir, base = truncpath:match("^(.*)/(.+)$")
+              local resolved = {}
+
+              if base and dir then
+                -- 路径部分（灰色）
+                table.insert(resolved, { dir .. "/", "SnacksPickerDir", field = "file" })
+                -- 文件名（白色）
+                table.insert(resolved, { base, "SnacksPickerFile", field = "file" })
+              else
+                -- 只有文件名
+                table.insert(resolved, { truncpath, "SnacksPickerFile", field = "file" })
+              end
+
+              return resolved
+            end,
+          })
+
+          -- 3. 冒号和行号（绿色）
+          table.insert(display_parts, { ":", "SnacksPickerDelim" })
+          table.insert(display_parts, { tostring(item.line_num), "SnacksPickerRow" })
+
+          -- 4. 空格
+          table.insert(display_parts, { " ", "Normal" })
+
+          -- 5. 书签名称（自定义颜色）
+          table.insert(display_parts, { item.bookmark_name, "BookmarksName" })
+
+          -- 6. 空格和代码内容（带语法高亮）
+          table.insert(display_parts, { " ", "Normal" })
+
+          -- 使用 Snacks.picker.highlight.format 添加语法高亮
+          Snacks.picker.highlight.format(item, item.line_content, display_parts, { lang = item.ft })
+
+          -- 7. 添加空格
+          table.insert(display_parts, { " ", "Normal" })
+
           return display_parts
         else
           -- 兼容旧格式
