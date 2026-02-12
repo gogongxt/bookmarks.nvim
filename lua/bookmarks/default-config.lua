@@ -19,10 +19,6 @@
 ---@field sort_by string | fun(bookmarks: Bookmarks.Node[]): nil Sort logic for bookmark list
 ---@field entry_display? fun(bookmark: Bookmarks.Node, bookmarks: Bookmarks.Node[]): string Entry display generation logic
 
----@class Bookmarks.Config.Calibrate
----@field auto_calibrate_cur_buf boolean Auto adjust window position when opening buffer
----@field show_calibrate_logs boolean Show calibration logs
-
 ---@alias Bookmarks.KeymapAction "quit" | "refresh" | "create_list" | "level_up" | "set_root" | "set_active" | "toggle" | "move_up" | "move_down" | "delete" | "rename" | "goto" | "cut" | "copy" | "paste" | "show_info" | "reverse" | "preview" | "show_help"
 
 ---@alias Bookmarks.KeymapCustomAction fun(node: Bookmarks.Node, info: Bookmarks.ActionNodeInfo): nil
@@ -55,7 +51,6 @@
 ---@field navigation Bookmarks.Config.Navigation Navigation configurations
 ---@field signs Bookmarks.Config.Signs Sign configurations
 ---@field picker Bookmarks.Config.Picker Picker configurations
----@field calibrate Bookmarks.Config.Calibrate Calibration configurations
 ---@field commands table<string, function> Custom commands available in command picker
 ---@field treeview Bookmarks.Config.TreeView Tree view configurations
 ---@field storage Bookmarks.Config.Storage Storage configurations
@@ -101,13 +96,6 @@ return {
     -- entry display generation logic
     ---@type: nil | fun(bookmark: Bookmarks.Node, bookmarks: Bookmarks.Node[]): string
     entry_display = nil,
-  },
-
-  -- Bookmark position calibration
-  calibrate = {
-    -- Auto adjust window position when opening buffer
-    auto_calibrate_cur_buf = true,
-    show_calibrate_logs = true,
   },
 
   -- Custom commands available in command picker

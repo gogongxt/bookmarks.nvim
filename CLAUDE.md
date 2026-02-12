@@ -34,7 +34,6 @@ The plugin follows a clean domain-driven architecture with clear separation of c
 - **`commands/`** - Command palette and exposed command functions
 - **`integrate/`** - External tool integrations (Aider AI coding assistant)
 - **`backup/`** - Automatic backup system
-- **`calibrate/`** - Position calibration to adjust bookmark line numbers after file changes
 - **`utils/`** - Shared utilities
 
 ## Development Workflow
