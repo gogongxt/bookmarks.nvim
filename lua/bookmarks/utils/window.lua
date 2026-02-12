@@ -59,7 +59,8 @@ function M.new_popup_window()
   return M.new_window()
 end
 
--- :lua require("bookmarks.utils.window").description_window(buf)
+---Create a description window for editing bookmark descriptions
+---@return {buf: integer, win: integer}
 function M.description_window()
   -- Get cursor position and screen dimensions
   local win_width = vim.api.nvim_win_get_width(0)

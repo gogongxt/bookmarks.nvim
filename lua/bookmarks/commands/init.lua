@@ -1,10 +1,8 @@
--- local Window = require("bookmarks.utils.window")
 local Service = require("bookmarks.domain.service")
 local Node = require("bookmarks.domain.node")
 local Location = require("bookmarks.domain.location")
 local Sign = require("bookmarks.sign")
 local Tree = require("bookmarks.tree")
--- local Node = require("bookmarks.node")
 
 local M = {}
 
@@ -51,24 +49,6 @@ M.current_file_bookmarks_to_new_list = function()
   end
   Sign.safe_refresh_signs()
   pcall(Tree.refresh, new_list.id)
-end
-
-M.delete_mark_of_current_file = function()
-  local filepath = Location.get_current_location().path
-  if not filepath then
-    vim.notify("No file path found", vim.log.levels.ERROR)
-    return
-  end
-
-  local query_api = require("bookmarks.query.query")
-  local success = query_api.eval(string.format("DELETE FROM nodes WHERE location_path = '%s'", filepath))
-
-  if success then
-    vim.notify(string.format("Deleted marks from %s", vim.fn.fnamemodify(filepath, ":t")), vim.log.levels.INFO)
-  else
-    vim.notify("Failed to delete marks", vim.log.levels.ERROR)
-  end
-  Sign.safe_refresh_signs()
 end
 
 M.mark_selected_files = function()

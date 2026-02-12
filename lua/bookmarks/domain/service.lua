@@ -371,26 +371,6 @@ function M.get_all_bookmarks_of_active_list()
   return Node.get_all_bookmarks(active_list)
 end
 
---- find a bookmark or list by ID
----@param node_id number # bookmark or list ID
----@return Bookmarks.Node? # Returns the bookmark or list, or nil if not found
-function M.find_node(node_id) end
-
---- add a bookmark or list to a list
----@param node_id number
----@param parent_list_id number
-function M.add_to_list(node_id, parent_list_id) end
-
---- copy a bookmark to a list
----@param bookmark_id number # bookmark ID
----@param list_id number # list ID
-function M.copy_bookmark_to_list(bookmark_id, list_id) end
-
---- move a bookmark to a list
----@param bookmark_id number # bookmark ID
----@param list_id number # list ID
-function M.move_bookmark_to_list(bookmark_id, list_id) end
-
 --- delete a bookmark or list
 ---@param id number # bookmark or list ID
 function M.delete_node(id)
@@ -415,10 +395,6 @@ end
 function M.remove_from_list(node_id, parent_id)
   Repo.remove_from_list(node_id, parent_id)
 end
-
---- Export list as text to a buffer. useful when you want to provide context to AI
---- @param list_id number # list ID
-function M.export_list_to_buffer(list_id) end
 
 --- Set the active list
 --- @param list_id number # list ID

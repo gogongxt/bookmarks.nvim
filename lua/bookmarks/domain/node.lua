@@ -1,6 +1,27 @@
 local M = {}
 local Location = require("bookmarks.domain.location")
-local Utils = require("bookmarks.utils")
+
+---Get the current version of the project
+---@return string|nil version The git commit hash or nil if error
+local function get_current_version()
+  -- Check if git command exists
+  local has_git = vim.fn.executable("git") == 1
+  if not has_git then
+    return nil
+  end
+
+  -- Execute git command and capture both output and error
+  local output = vim.fn.system("git rev-parse --short HEAD")
+  local exit_code = vim.v.shell_error
+
+  if exit_code ~= 0 then
+    return nil
+  end
+
+  -- Clean up the output by removing newline
+  local version = output:gsub("\n", "")
+  return version
+end
 
 ---@class Bookmarks.Node
 ---@field id number
@@ -46,7 +67,7 @@ function M.new_bookmark(name, location)
     description = "",
     location = location or Location.get_current_location(),
     content = vim.api.nvim_get_current_line(),
-    githash = Utils.get_current_version(),
+    githash = get_current_version(),
     created_at = time,
     visited_at = time,
     children = {},
