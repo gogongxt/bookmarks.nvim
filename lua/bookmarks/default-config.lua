@@ -7,6 +7,7 @@
 ---@field line_bg string Sign line background color
 
 ---@class Bookmarks.Config.Signs
+---@field enable_auto_line_adjust boolean Enable automatic line number adjustment
 ---@field mark Bookmarks.Config.Signs.Mark
 ---@field desc_format fun(bookmark: Bookmarks.Node): string Function to format bookmark description
 
@@ -58,6 +59,8 @@ return {
 
   -- Bookmarks sign configurations
   signs = {
+    -- Enable automatic line number adjustment when code is modified
+    enable_auto_line_adjust = true,
     -- Sign mark icon and color in the gutter
     mark = {
       icon = "󰃁",

@@ -1,6 +1,7 @@
 local Repo = require("bookmarks.domain.repo")
 local Service = require("bookmarks.domain.service")
 local Node = require("bookmarks.domain.node")
+local Tracker = require("bookmarks.tracker")
 
 local has_snacks, snacks = pcall(require, "snacks")
 if not has_snacks then
@@ -171,6 +172,24 @@ function M.pick_bookmark(callback, opts)
           if normalized_path then
             local line_num = bookmark.location.line or 1
             local col_num = bookmark.location.col or 0
+
+            -- Try to get current line from extmark if auto-adjust is enabled
+            if vim.g.bookmarks_config and vim.g.bookmarks_config.signs.enable_auto_line_adjust then
+              -- Find if this file is open in any buffer
+              for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+                local buf_name = vim.api.nvim_buf_get_name(bufnr)
+                -- Normalize buffer path for comparison
+                local normalized_buf_path = normalize_path(buf_name)
+                if normalized_buf_path == normalized_path then
+                  -- File is open in this buffer, try to get extmark position
+                  local extmark_line = Tracker.get_current_line_from_extmark(bufnr, bookmark.id)
+                  if extmark_line then
+                    line_num = extmark_line
+                  end
+                  break
+                end
+              end
+            end
 
             -- 预读取行内容用于显示
             local line_content = get_line_content(normalized_path, line_num)

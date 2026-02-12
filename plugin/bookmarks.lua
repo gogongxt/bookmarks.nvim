@@ -19,8 +19,7 @@ local bookmarks = require("bookmarks")
 local Commands = require("bookmarks.commands")
 
 vim.api.nvim_create_user_command("BookmarksMark", bookmarks.toggle_mark, {
-  desc =
-  "Mark current line into active BookmarkList. Rename existing bookmark under cursor. Toggle it off if the new name is an empty string",
+  desc = "Mark current line into active BookmarkList. Rename existing bookmark under cursor. Toggle it off if the new name is an empty string",
 })
 
 vim.api.nvim_create_user_command("BookmarksDesc", bookmarks.attach_desc, {
@@ -111,3 +110,15 @@ vim.api.nvim_create_user_command(
   bookmarks.sign_toggle,
   { desc = "Toggle bookmark signs display" }
 )
+
+-- Debug commands
+vim.api.nvim_create_user_command("BookmarksDebugShowExtmarks", function()
+  require("bookmarks.debug").show_extmarks()
+end, { desc = "Show all tracked extmarks (debug)" })
+
+vim.api.nvim_create_user_command("BookmarksDebugInspect", function()
+  local bookmark_id = tonumber(vim.fn.input("Bookmark ID: "))
+  if bookmark_id then
+    require("bookmarks.debug").inspect_bookmark(bookmark_id)
+  end
+end, { desc = "Inspect a specific bookmark (debug)" })

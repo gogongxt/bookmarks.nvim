@@ -3,6 +3,7 @@ local Location = require("bookmarks.domain.location")
 local Repo = require("bookmarks.domain.repo")
 -- TODO: remove this dependency, fire domain events instead
 local Sign = require("bookmarks.sign")
+local Tracker = require("bookmarks.tracker")
 
 local M = {}
 
@@ -70,12 +71,19 @@ end
 --- @return Bookmarks.Node[]
 function M.find_bookmarks_of_file(filepath)
   local filepath = filepath or Location.get_current_location().path
+  -- Normalize filepath for consistent comparison
+  local normalized_filepath = vim.fn.resolve(vim.fn.fnamemodify(filepath, ":p"))
+
   local bookmarks = Repo.get_all_bookmarks()
   local file_bms = {}
 
   for _, bookmark in ipairs(bookmarks) do
-    if filepath == bookmark.location.path then
-      table.insert(file_bms, bookmark)
+    if bookmark.location then
+      -- Normalize bookmark path for comparison
+      local bookmark_path = vim.fn.resolve(vim.fn.fnamemodify(bookmark.location.path, ":p"))
+      if bookmark_path == normalized_filepath then
+        table.insert(file_bms, bookmark)
+      end
     end
   end
 
@@ -175,13 +183,84 @@ function M.goto_bookmark(bookmark_id, opts)
     end
   end
 
-  -- Move cursor to the bookmarked position with validation
+  -- Move cursor to the bookmark's current position
   local current_buf = vim.api.nvim_get_current_buf()
   local line_count = vim.api.nvim_buf_line_count(current_buf)
 
+  if vim.g.bookmarks_debug then
+    vim.notify(
+      string.format(
+        "[DEBUG goto] current_buf=%d, path=%s, bookmark_id=%d",
+        current_buf,
+        vim.api.nvim_buf_get_name(current_buf),
+        node.id
+      ),
+      vim.log.levels.INFO
+    )
+  end
+
+  -- Try to get current position from extmark first (if feature is enabled)
+  local target_line_from_extmark = nil
+  if vim.g.bookmarks_config and vim.g.bookmarks_config.signs.enable_auto_line_adjust then
+    -- First, try to get the extmark directly without checking existence first
+    target_line_from_extmark = Tracker.get_current_line_from_extmark(current_buf, node.id)
+
+    if not target_line_from_extmark then
+      -- Extmark doesn't exist or couldn't be read
+      -- Create it at the stored line position as fallback
+      local stored_line = math.min(math.max(node.location.line, 1), line_count)
+      vim.notify(
+        string.format(
+          "[DEBUG] No extmark found, creating at line %d (stored: %d, buffer: %s)",
+          stored_line,
+          node.location.line,
+          vim.api.nvim_buf_get_name(current_buf)
+        ),
+        vim.log.levels.INFO
+      )
+      Tracker.create_tracking_extmark(current_buf, stored_line, node.location.col or 0, node.id, true)
+
+      -- Try to get it again after creation
+      target_line_from_extmark = Tracker.get_current_line_from_extmark(current_buf, node.id)
+      if target_line_from_extmark then
+        if vim.g.bookmarks_debug then
+          vim.notify(
+            string.format("[DEBUG] After creation, extmark at line %d", target_line_from_extmark),
+            vim.log.levels.INFO
+          )
+        end
+      else
+        if vim.g.bookmarks_debug then
+          vim.notify("[DEBUG] Still can't get extmark after creation!", vim.log.levels.WARN)
+        end
+      end
+    else
+      if vim.g.bookmarks_debug then
+        vim.notify(
+          string.format(
+            "[DEBUG] Found existing extmark at line %d (stored: %d)",
+            target_line_from_extmark,
+            node.location.line
+          ),
+          vim.log.levels.INFO
+        )
+      end
+    end
+  end
+
+  -- Use extmark position if available, otherwise fall back to stored line
+  local target_line_stored = node.location.line
+  local target_line = target_line_from_extmark or target_line_stored
+
   -- Validate line number is within buffer bounds
-  local target_line = math.min(node.location.line, line_count)
+  target_line = math.min(target_line, line_count)
   target_line = math.max(1, target_line) -- Ensure at least line 1
+
+  -- If extmark position differs from stored, update it immediately
+  if target_line_from_extmark and target_line_from_extmark ~= target_line_stored then
+    node.location.line = target_line_from_extmark
+    Repo.update_node(node)
+  end
 
   -- Validate column number is within line bounds
   local line_content = vim.api.nvim_buf_get_lines(current_buf, target_line - 1, target_line, false)[1]
@@ -505,6 +584,120 @@ function M.markfile(filepath, parent_list_id)
 
   local id = Repo.insert_node(bookmark, parent_list_id)
   return Repo.find_node(id) or error("Failed to create bookmark")
+end
+
+--- Update bookmark line numbers from current extmark positions
+--- Called automatically on file save
+--- @param bufnr number Buffer number
+--- @return table { updated: number, errors: number }
+function M.update_bookmark_positions_from_extmarks(bufnr)
+  -- Check if feature is enabled
+  if not vim.g.bookmarks_config or not vim.g.bookmarks_config.signs.enable_auto_line_adjust then
+    return { updated = 0, errors = 0 }
+  end
+
+  local filepath = vim.api.nvim_buf_get_name(bufnr)
+
+  -- Validate buffer has a file
+  if not filepath or filepath == "" then
+    return { updated = 0, errors = 0 }
+  end
+
+  -- Normalize filepath for consistent comparison
+  -- Use resolve to follow symlinks and fnamemify to get absolute path
+  local normalized_filepath = vim.fn.resolve(vim.fn.fnamemodify(filepath, ":p"))
+
+  -- Find all bookmarks in this file
+  local active_list = Repo.ensure_and_get_active_list()
+  local all_bookmarks = Node.get_all_bookmarks(active_list)
+  local file_bookmarks = {}
+
+  for _, bookmark in ipairs(all_bookmarks) do
+    if bookmark.location then
+      -- Normalize bookmark path for comparison
+      local bookmark_path = vim.fn.resolve(vim.fn.fnamemodify(bookmark.location.path, ":p"))
+      if bookmark_path == normalized_filepath then
+        table.insert(file_bookmarks, bookmark)
+      end
+    end
+  end
+
+  local updated = 0
+  local errors = 0
+
+  for _, bookmark in ipairs(file_bookmarks) do
+    -- Get current position from extmark
+    local current_line = Tracker.get_current_line_from_extmark(bufnr, bookmark.id)
+
+    if current_line then
+      -- Always update content to the current line's content
+      local new_content = vim.api.nvim_buf_get_lines(bufnr, current_line - 1, current_line, false)[1]
+      local content_changed = (bookmark.content ~= new_content)
+      local line_changed = (current_line ~= bookmark.location.line)
+
+      if content_changed or line_changed then
+        bookmark.location.line = current_line
+        bookmark.content = new_content
+        Repo.update_node(bookmark)
+        updated = updated + 1
+      end
+    else
+      -- No extmark found - this can happen if:
+      -- 1. Buffer was just loaded (extmarks not created yet)
+      -- 2. File was modified externally
+      -- In this case, create extmark at current stored line
+      local success =
+        Tracker.create_tracking_extmark(bufnr, bookmark.location.line, bookmark.location.col or 0, bookmark.id, true)
+      if not success then
+        errors = errors + 1
+      end
+    end
+  end
+
+  return { updated = updated, errors = errors }
+end
+
+--- Initialize extmarks for all bookmarks in a buffer
+--- Called on BufRead to recreate tracking extmarks
+--- @param bufnr number Buffer number
+--- @return number # Number of extmarks created
+function M.initialize_buffer_extmarks(bufnr)
+  -- Check if feature is enabled
+  if not vim.g.bookmarks_config or not vim.g.bookmarks_config.signs.enable_auto_line_adjust then
+    return 0
+  end
+
+  local filepath = vim.api.nvim_buf_get_name(bufnr)
+
+  -- Validate buffer has a file
+  if not filepath or filepath == "" then
+    return 0
+  end
+
+  -- Normalize filepath for consistent comparison
+  local normalized_filepath = vim.fn.resolve(vim.fn.fnamemodify(filepath, ":p"))
+
+  local active_list = Repo.ensure_and_get_active_list()
+  local all_bookmarks = Node.get_all_bookmarks(active_list)
+  local created = 0
+
+  for _, bookmark in ipairs(all_bookmarks) do
+    if bookmark.location then
+      -- Normalize bookmark path for comparison
+      local bookmark_path = vim.fn.resolve(vim.fn.fnamemodify(bookmark.location.path, ":p"))
+      if bookmark_path == normalized_filepath then
+        -- Create tracking extmark at stored line position
+        -- Use force=true to ensure extmark is created even if one somehow exists
+        local success =
+          Tracker.create_tracking_extmark(bufnr, bookmark.location.line, bookmark.location.col or 0, bookmark.id, true)
+        if success then
+          created = created + 1
+        end
+      end
+    end
+  end
+
+  return created
 end
 
 --- Use Snacks file picker to select multiple files and mark them
