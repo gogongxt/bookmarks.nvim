@@ -43,7 +43,6 @@ function M.load_data()
   -- Create new data structure
   data = {
     version = "1.0",
-    project_root = project_root,
     created_at = os.time(),
     updated_at = os.time(),
     next_id = 1,
