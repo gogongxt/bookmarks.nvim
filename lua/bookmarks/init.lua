@@ -119,13 +119,34 @@ M.attach_desc = function()
 
   -- Set keymaps
   vim.keymap.set("n", "<CR>", function()
-    bookmark.description = table.concat(vim.api.nvim_buf_get_lines(popup.buf, 0, -1, false), "\n")
-    if bookmark.id then
-      ---@cast bookmark Bookmarks.Node
-      Repo.update_node(bookmark)
-    else
-      ---@cast bookmark Bookmarks.NewNode
-      Service.new_bookmark(bookmark)
+    local lines = vim.api.nvim_buf_get_lines(popup.buf, 0, -1, false)
+    local description = table.concat(lines, "\n")
+
+    -- Check if all lines are empty (user wants to delete the bookmark)
+    local is_empty = true
+    for _, line in ipairs(lines) do
+      if line:match("%S") then
+        is_empty = false
+        break
+      end
+    end
+
+    if is_empty and bookmark.id then
+      -- Delete bookmark if description is empty and bookmark exists
+      Service.remove_bookmark(bookmark.id)
+      Sign.safe_refresh_signs()
+      pcall(Tree.refresh)
+    elseif not is_empty then
+      bookmark.description = description
+      if bookmark.id then
+        ---@cast bookmark Bookmarks.Node
+        Repo.update_node(bookmark)
+      else
+        ---@cast bookmark Bookmarks.NewNode
+        Service.new_bookmark(bookmark)
+      end
+      Sign.safe_refresh_signs()
+      pcall(Tree.refresh)
     end
     vim.api.nvim_win_close(popup.win, true)
   end, { buffer = popup.buf })
