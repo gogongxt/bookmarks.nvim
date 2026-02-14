@@ -36,7 +36,7 @@
 ```lua
 -- with lazy.nvim
 return {
-  "LintaoAmons/bookmarks.nvim",
+  "gogongxt/bookmarks.nvim",
   -- pin the plugin at specific version for stability
   -- backup your bookmark data when there are breaking changes (major version change)
   dependencies = {

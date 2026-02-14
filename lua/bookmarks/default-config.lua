@@ -69,12 +69,11 @@ return {
     },
     desc_format = function(bookmark)
       ---@cast bookmark Bookmarks.Node
-      -- Show first line of description if available, otherwise show name
+      -- Show first line of description with "..." suffix if available, otherwise show name
       if bookmark.description and bookmark.description ~= "" then
-        local first_line = bookmark.description:match("[^\n]+") or bookmark.description
-        return bookmark.order .. ": " .. first_line
+        return (bookmark.description:match("[^\n]+") or bookmark.description) .. "..."
       end
-      return bookmark.order .. ": " .. bookmark.name
+      return bookmark.name
     end,
   },
 
