@@ -13,6 +13,12 @@ M.setup = require("bookmarks.config").setup
 
 M.toggle_mark = function()
   local b = Service.find_bookmark_by_location()
+
+  -- If current bookmark is Desc type (has description, no name), redirect to attach_desc
+  if b and (b.name == "" or not b.name) and b.description and b.description ~= "" then
+    return M.attach_desc()
+  end
+
   local prompt = b and "[Edit Bookmark]" or "[New Bookmark]"
   local default_name = b and b.name or ""
 
@@ -101,7 +107,14 @@ M.commands = function()
 end
 
 M.attach_desc = function()
-  local bookmark = Service.find_bookmark_by_location() or Node.new_bookmark("")
+  local bookmark = Service.find_bookmark_by_location()
+
+  -- If current bookmark is Mark type (has name, no description), redirect to toggle_mark
+  if bookmark and bookmark.name and bookmark.name ~= "" and (not bookmark.description or bookmark.description == "") then
+    return M.toggle_mark()
+  end
+
+  bookmark = bookmark or Node.new_bookmark("")
   local popup = require("bookmarks.utils.window").description_window()
 
   -- Set buffer options
@@ -138,6 +151,7 @@ M.attach_desc = function()
       pcall(Tree.refresh)
     elseif not is_empty then
       bookmark.description = description
+      bookmark.name = "" -- Clear name when creating Desc (mutually exclusive with Mark)
       if bookmark.id then
         ---@cast bookmark Bookmarks.Node
         Repo.update_node(bookmark)

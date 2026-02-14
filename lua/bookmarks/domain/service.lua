@@ -22,28 +22,35 @@ function M.new_bookmark(bookmark, parent_list_id)
   return Repo.find_node(id) or error("Failed to create bookmark")
 end
 
---- Create a new bookmark
+--- Create a new bookmark (Mark type - clears description)
 --- e.g.
 --- :lua require("bookmarks.domain.service").mark("mark current line")
 ---@param name string # the name of the bookmark
 ---@param location Bookmarks.Location? # location of the bookmark
 ---@param parent_list_id number? # parent list ID, if nil, bookmark will be added to current active list
----@return Bookmarks.Node # Returns the created bookmark
+---@return Bookmarks.Node? # Returns the bookmark, or nil if no bookmark was created/updated
 function M.toggle_mark(name, location, parent_list_id)
   location = location or Location.get_current_location()
 
-  -- if location have already bookmark, and name is empty string, remove it
   local existing_bookmark = Repo.find_bookmark_by_location(location)
   if existing_bookmark then
     if name == "" then
+      -- Empty name with existing bookmark: delete it
       M.remove_bookmark(existing_bookmark.id)
-      return existing_bookmark
+      return nil
     else
-      return M.rename_node(existing_bookmark.id, name)
+      -- Clear description when creating Mark (mutually exclusive with Desc)
+      existing_bookmark.name = name
+      existing_bookmark.description = ""
+      return Repo.update_node(existing_bookmark)
     end
   end
 
-  -- else create a new bookmark
+  -- Only create new bookmark if name is not empty
+  if name == "" then
+    return nil
+  end
+
   parent_list_id = parent_list_id or Repo.ensure_and_get_active_list().id
   local bookmark = Node.new_bookmark(name, location)
 

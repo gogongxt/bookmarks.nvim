@@ -161,8 +161,11 @@ function M.pick_bookmark(callback, opts)
     for _, bookmark in ipairs(_bookmarks) do
       -- Basic validation only
       if bookmark and bookmark.location and bookmark.location.path then
-        -- Validate all string fields to prevent encoding errors
+        -- Get name, fallback to first line of description if name is empty
         local name = bookmark.name or ""
+        if name == "" and bookmark.description and bookmark.description ~= "" then
+          name = bookmark.description:match("[^\n]+") or bookmark.description
+        end
         local path = bookmark.location.path or ""
 
         -- Only process if all required strings are valid

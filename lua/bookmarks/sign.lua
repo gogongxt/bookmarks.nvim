@@ -159,7 +159,14 @@ function M._refresh_signs(bookmarks)
   local filepath = vim.fn.expand("%:p")
   for _, bookmark in ipairs(bookmarks) do
     if filepath == bookmark.location.path then
-      local desc = vim.g.bookmarks_config.signs.desc_format(bookmark)
+      -- Get display text: first line of description (for Desc) or name (for Mark)
+      local display_text
+      if bookmark.description and bookmark.description ~= "" then
+        display_text = bookmark.description:match("[^\n]+") or bookmark.description
+      else
+        display_text = bookmark.name or ""
+      end
+      local desc = bookmark.order .. ": " .. display_text
       pcall(M.place_sign, bookmark.location.line, buf_number, desc, bookmark.id)
     end
   end
